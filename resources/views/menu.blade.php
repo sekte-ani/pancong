@@ -57,7 +57,7 @@
                 {{-- produk 1 --}}
                 <div class="col-md-4 col-sm-6 d-flex justify-content-center">
                   <div class="card" style="width: 16rem; position: relative;">
-                    <img src="assets/img/menu/menu-item-2.png" class="card-img-top" alt="Aut Luia">
+                    <img src="{{ asset('assets/img/menu/menu-item-2.png') }}" class="card-img-top" alt="Aut Luia">
                     <div class="card-body p-3">
                       <h6 class="card-title mb-1">Aut Luia</h6>
                       <p class="card-text text-muted small mb-1">

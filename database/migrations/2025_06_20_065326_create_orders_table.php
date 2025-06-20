@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal')->nullable();
+            $table->double('total')->nullable();
+            $table->unsignedBigInteger('pelanggan_id');
             $table->timestamps();
+
+            $table->foreign('pelanggan_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

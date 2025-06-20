@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('menu_id');
+            $table->unsignedBigInteger('order_id');
+            $table->integer('qty')->nullable();
+            $table->double('harga')->nullable();
+            $table->enum('status', ['Pending', 'Paid'])->default('Pending');
             $table->timestamps();
+
+            $table->foreign('menu_id')->references('id')->on('menus')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
         });
     }
 
