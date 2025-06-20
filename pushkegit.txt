@@ -1,0 +1,4 @@
+git add .
+git commit -m "terakhir"
+git push -u origin main
+git status
