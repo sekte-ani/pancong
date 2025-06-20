@@ -16,12 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('menu_id');
             $table->unsignedBigInteger('order_id');
             $table->integer('qty')->nullable();
-            $table->double('harga')->nullable();
-            $table->enum('status', ['Pending', 'Paid'])->default('Pending');
+            $table->decimal('harga',10,2)->nullable();
+            $table->decimal('total',10,2)->nullable();
             $table->timestamps();
 
-            $table->foreign('menu_id')->references('id')->on('menus')->onDelete('cascade');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('menu_id')->references('id_item')->on('menus')->onDelete('cascade');
+            $table->foreign('order_id')->references('id_pesanan')->on('orders')->onDelete('cascade');
         });
     }
 

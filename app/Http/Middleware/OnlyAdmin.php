@@ -16,8 +16,12 @@ class OnlyAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->id != 1) {
-            return redirect()->intended(route('dashboard'))->with('error', 'Anda Bukan Admin!');
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('home')->with('error', 'Anda tidak memiliki akses admin!');
         }
 
         return $next($request);

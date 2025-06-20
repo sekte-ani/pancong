@@ -1,59 +1,61 @@
 <li class="sidebar-title">Menu</li>
-{{-- Dashboard --}}
-<li class="sidebar-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
-    <a href="{{ route('admin.index') }}"  class='sidebar-link'>
+
+<li class="sidebar-item {{ Route::currentRouteName() == 'admin.index' ? 'active' : '' }}">
+    <a href="{{ route('admin.index') }}" class='sidebar-link'>
         <i class="bi bi-grid-fill"></i>
-        <span>Home</span>
+        <span>Dashboard</span>
     </a>
 </li>
 
-@include('admin.layouts.components.sidebar.postDropdown')
-@include('admin.layouts.components.sidebar.galleryDropdown')
-@include('admin.layouts.components.sidebar.masterDropdown')
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
+        'admin.category', 'admin.createCategory', 'admin.editCategory'
+    ]) ? 'active' : '' 
+}}">
+    <a href="{{ route('admin.category') }}" class='sidebar-link'>
+        <i class="bi bi-collection-fill"></i>
+        <span>Kategori</span>
+    </a>
+</li>
 
-
-{{-- teacher --}}
-<li class="sidebar-item {{ Request::is('admin/menu*') || Request::is('admin/createMenu*') || Request::is('admin/editMenu*') || Request::is('admin/showMenu*') ? 'active' : '' }}">
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
+        'admin.menu', 'admin.createMenu', 'admin.editMenu', 'admin.showMenu'
+    ]) ? 'active' : '' 
+}}">
     <a href="{{ route('admin.menu') }}" class='sidebar-link'>
-        <i class="bi bi-journal"></i>
+        <i class="bi bi-basket-fill"></i>
         <span>Menu</span>
     </a>
 </li>
-{{-- ebook --}}
-{{-- <li class="sidebar-item {{ Request::is('admin/ebook*') || Request::is('admin/createEbook*') || Request::is('admin/editEbook*') || Request::is('admin/showEbook*') ? 'active' : '' }}">
-    <a href="{{ route('admin.ebook') }}" class='sidebar-link'>
-        <i class="bi bi-journal-album"></i>
-        <span>Ebook</span>
+
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
+        'admin.order', 'admin.showOrder'
+    ]) ? 'active' : '' 
+}}">
+    <a href="{{ route('admin.order') }}" class='sidebar-link'>
+        <i class="bi bi-receipt"></i>
+        <span>Pesanan</span>
     </a>
-</li> --}}
+</li>
 
-{{-- Student --}}
-{{-- <li class="sidebar-item {{ Request::is('admin/employee*') || Request::is('admin/createEmployee*') || Request::is('admin/editEmployee*') || Request::is('admin/showEmployee*') ? 'active' : '' }}">
-    <a href="{{ route('admin.employee') }}" class='sidebar-link'>
-        <i class="bi bi-person-rolodex"></i>
-        <span>Student</span>
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
+        'admin.gallery', 'admin.createGallery', 'admin.editGallery'
+    ]) ? 'active' : '' 
+}}">
+    <a href="{{ route('admin.gallery') }}" class='sidebar-link'>
+        <i class="bi bi-image-fill"></i>
+        <span>Gallery</span>
     </a>
-</li> --}}
+</li>
 
-{{-- announce --}}
-
-
-{{-- message --}}
-{{-- <li class="sidebar-item {{ Request::is('admin/message*') || Request::is('admin/createMessage*') || Request::is('admin/editMessage*') || Request::is('admin/showMessage*') ? 'active' : '' }}">
-    <a href="{{ route('admin.message') }}" class='sidebar-link'>
-        <i class="bi bi-chat-square-text-fill"></i>
-        <span>Message</span>
-    </a>
-</li> --}}
-
-
+<li class="sidebar-title">Settings</li>
 
 <li class="sidebar-item">
-    <form method="POST" action="/logout" id="logout">
-        @csrf
-        <a href="" class='sidebar-link'>
-            <i class="bi bi-box-arrow-left text-danger"></i>
-            <span>Logout</span>
-        </a>
-    </form>
+    <a href="{{ url('/logout') }}" class='sidebar-link text-danger' onclick="return confirm('Yakin ingin logout?')">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+    </a>
 </li>

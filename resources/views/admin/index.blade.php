@@ -1,59 +1,78 @@
-@extends('admin.layouts.index', ['title' => 'Dashboard', 'page_heading' => 'Dashboard - '. auth()->user()->nama])
-	
+@extends('admin.layouts.index', ['title' => 'Dashboard', 'page_heading' => 'Dashboard Admin'])
 
 @section('content')
-@include('sweetalert::alert')
 <section class="row">
-    <h1>Halo {{ auth()->user()->nama }}</h1>
+    <div class="col-12 col-lg-12">
+        <div class="row">
+            <div class="col-6 col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body px-4 py-4-5">
+                        <div class="row">
+                            <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                <div class="stats-icon purple mb-2">
+                                    <i class="iconly-boldBuy"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <h6 class="text-muted font-semibold">Total Items</h6>
+                                <h6 class="font-extrabold mb-0">{{ $menus }}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body px-4 py-4-5">
+                        <div class="row">
+                            <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                <div class="stats-icon blue mb-2">
+                                    <i class="iconly-boldCategory"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <h6 class="text-muted font-semibold">Kategori</h6>
+                                <h6 class="font-extrabold mb-0">{{ $categories }}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body px-4 py-4-5">
+                        <div class="row">
+                            <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                <div class="stats-icon green mb-2">
+                                    <i class="iconly-boldTicket"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <h6 class="text-muted font-semibold">Pesanan Hari Ini</h6>
+                                <h6 class="font-extrabold mb-0">{{ $orderToday }}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body px-4 py-4-5">
+                        <div class="row">
+                            <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                <div class="stats-icon red mb-2">
+                                    <i class="iconly-boldWallet"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                <h6 class="text-muted font-semibold">Pendapatan Hari Ini</h6>
+                                <h6 class="font-extrabold mb-0">Rp {{ number_format($income, 0, ',', '.') }}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
-
-
-
-
 @endsection
-
-
-{{-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Create Article</title>
-</head>
-<body>
-    @include('sweetalert::alert')
-    @if (Route::has('login'))
-        <div class="sm:fixed sm:top-0 sm:right-2 p-6 text-right z-10">
-            @auth
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-dropdown-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-dropdown-link>
-                </form>
-            @endauth
-        </div>
-        <div class="sm:fixed sm:top-0 sm:right-2 p-6 text-right z-10">
-            <a href="{{ route('admin.index') }}" class="button btn-primary">Home</a>
-            <a href="{{ route('admin.article') }}" class="button btn-primary">Article</a>
-            <a href="{{ route('admin.category') }}" class="button btn-primary">Category</a>
-            <a href="{{ route('admin.position') }}" class="button btn-primary">Position</a>
-            <a href="{{ route('admin.teacher') }}" class="button btn-primary">Teacher</a>
-            <a href="{{ route('admin.activity') }}" class="button btn-primary">Activity</a>
-            <a href="{{ route('admin.gallery') }}" class="button btn-primary">Album</a>
-            <a href="{{ route('admin.employee') }}" class="button btn-primary">Employee</a>
-            <a href="{{ route('admin.announce') }}" class="button btn-primary">Announcement</a>
-            <a href="{{ route('admin.message') }}" class="button btn-primary">Message</a>
-        </div>
-    @endif
-    <h1>Ini {{ Auth::user()->name }}</h1>
-    <hr>
-    <h4>Hari Ini: {{ $todayVisits }}</h4><br>
-    <h4>Bulan Ini: {{ $monthVisits }}</h4><br>
-    <h4>Total Kunjungan: {{ $totalVisits }}</h4><br>
-</body>
-</html> --}}

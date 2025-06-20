@@ -17,8 +17,11 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+    protected $primaryKey = 'id_akun';
+
     protected $guarded = [
-        'id',
+        'id_akun',
     ];
 
     /**
@@ -40,4 +43,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'pelanggan_id', 'id_akun');
+    }
 }

@@ -12,13 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->date('tanggal')->nullable();
-            $table->double('total')->nullable();
+            $table->id('id_pesanan');
             $table->unsignedBigInteger('pelanggan_id');
+            $table->date('waktu_pesanan')->useCurrent();
+            $table->decimal('total_harga',10,2)->nullable();
+            $table->string('no_meja', 10)->nullable();
+            $table->string('catatan')->nullable();
+            $table->enum('status', ['Pending', 'Paid', 'Process', 'Ready', 'Done'])->default('Pending');
             $table->timestamps();
 
-            $table->foreign('pelanggan_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('pelanggan_id')->references('id_akun')->on('users')->onDelete('cascade');
         });
     }
 
