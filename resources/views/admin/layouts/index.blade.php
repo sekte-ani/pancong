@@ -18,6 +18,7 @@
                 <h3>{{ $page_heading }}</h3>
             </div>
             <div class="page-content">
+                @include('sweetalert::alert')
                 @yield('content')
             </div>
             @include('admin.layouts.partials.footer')

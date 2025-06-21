@@ -32,13 +32,28 @@ Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth');
 // GUEST
 Route::get('/', [HomeController::class,'index'])->name('home');
 Route::get('/menu', [MenuController::class, 'index'])->name('menu');
+Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search');
+Route::get('/menu/category', [MenuController::class, 'getByCategory'])->name('menu.category');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
+
+// CART
+Route::get('/cart', [CartController::class, 'viewCart'])->name('cart');
+Route::get('/cart/summary', [CartController::class, 'getCartSummary'])->name('cart.summary');
 Route::middleware('auth')->group(function(){
-    Route::post('/add-to-cart', [CartController::class, 'addToCart']);
-    Route::get('/cart', [CartController::class, 'viewCart']);
-    Route::post('/checkout', [OrderController::class, 'checkout']);
-    Route::get('/my-orders', [OrderController::class, 'myOrders']);
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::put('/cart/update', [CartController::class, 'updateCart'])->name('cart.update');
+    Route::delete('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::delete('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
+    Route::get('/cart/check-item', [CartController::class, 'checkItemInCart'])->name('cart.check');
+});
+
+// ORDER
+Route::middleware('auth')->group(function(){
+    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout', [OrderController::class, 'storeOrder'])->name('checkout.store');
+    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('my.orders');
+    Route::get('/order/{order}', [OrderController::class, 'showOrder'])->name('order.show');
 });
 
 // ADMIN

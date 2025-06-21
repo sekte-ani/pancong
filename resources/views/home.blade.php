@@ -11,9 +11,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 </head>
-<body>
-    <main class="main">
 
+<body>
+  <main class="main">
+    
+    @include('sweetalert::alert')
     <!-- Hero Section -->
     <section id="hero" class="hero section light-background">
 

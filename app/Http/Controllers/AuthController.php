@@ -10,15 +10,19 @@ use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
-    public function register(){
+    public function register()
+    {
         return view('save.regist');
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $validate = $request->validate([
+            'username' => 'required',
             'nama' => 'required',
             'email' => 'required|email',
-            'password' => 'required',
+            'no_telepon' => 'nullable|number',
+            'password' => 'required|min:8',
             'confirm-password' => 'required|same:password'
         ]);
         $data = $request->except('confirm-password', 'password');
@@ -66,6 +70,6 @@ class AuthController extends Controller
     
         $request->session()->regenerateToken();
     
-        return redirect('/')->with('success', 'Terima Kasih Telah Menggunakan BRINI :D');
+        return redirect('/')->with('success', 'Terima Kasih :D');
     }
 }

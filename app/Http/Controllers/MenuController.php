@@ -2,14 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
-    public function index(){
-        $menus = Menu::all();
+    public function index(Request $request){
+        $query = Menu::with('category');
+
+        if ($request->has('category') && $request->category != ''){
+            $query->where('kategori_id', $request->category);
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama_item', 'like', '%' . $request->search . '%');
+        }
+
+        $menus = $query->get();
+        $categories = Category::withCount('menus')->get();
         
-        return view("menu",compact("menus"));
+        $menusByCategory = $menus->groupBy('category.nama_kategori');
+        
+        return view('menu.index', compact([
+            'menus',
+            'categories',
+            'menusByCategory'
+        ]));
+    }
+
+    public function show(Menu $menu){
+        $menu->load('category');
+
+        $relatedMenus = Menu::where('kategori_id', $menu->kategori_id)
+                            ->where('id_item', '!=', $menu->id_item)
+                            ->take(4)
+                            ->get();
+
+        return view('menu.show', compact([
+            'menu',
+            'relatedMenus'
+        ]));
+    }
+
+    public function getByCategory(Request $request)
+    {
+        $kategoriId = $request->get('kategori_id');
+        
+        $menus = Menu::with('category')
+                    ->when($kategoriId, function($query) use ($kategoriId) {
+                        return $query->where('kategori_id', $kategoriId);
+                    })
+                    ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $menus->map(function($item) {
+                return [
+                    'id_item' => $item->id_item,
+                    'nama_item' => $item->nama_item,
+                    'harga' => $item->harga,
+                    'harga_formatted' => 'Rp ' . number_format($item->harga, 0, ',', '.'),
+                    'gambar' => $item->gambar ? asset('gambar-menu/' . $item->gambar) : asset('img/logo_pancong.png'),
+                    'kategori' => $item->category->nama_kategori
+                ];
+            })
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->get('search', '');
+        
+        if (strlen($search) < 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Minimal 2 karakter untuk pencarian'
+            ]);
+        }
+
+        $menus = Menu::with('category')
+                    ->where('nama_item', 'like', '%' . $search . '%')
+                    ->take(10)
+                    ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $menus->map(function($item) {
+                return [
+                    'id_item' => $item->id_item,
+                    'nama_item' => $item->nama_item,
+                    'harga' => $item->harga,
+                    'harga_formatted' => 'Rp ' . number_format($item->harga, 0, ',', '.'),
+                    'gambar' => $item->gambar ? asset('admin/img/' . $item->gambar) : asset('img/logo_pancong.png'),
+                    'kategori' => $item->kategori->nama_kategori
+                ];
+            })
+        ]);
     }
 }

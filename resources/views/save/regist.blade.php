@@ -19,6 +19,7 @@
   </head>
 
   <body class="m-0 font-sans antialiased font-normal bg-white text-start text-base leading-default text-slate-500">
+    @include('sweetalert::alert')
     <main class="mt-0 transition-all duration-200 ease-in-out">
       <section>
         <a href="/login"><svg class="back-button m-3" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -37,7 +38,11 @@
                 <h5>Register</h5>
               </div>
               <div class="flex-auto p-6">
-                <form role="form text-left">
+                <form role="form text-left" action="register" method="POST">
+                  @csrf
+                  <div class="mb-4">
+                    <input type="text" name="username" class="text-sm focus:shadow-primary-outline leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 px-3 font-normal text-gray-700 transition-all focus:border-[#5e72e4] focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow @error('username') is-invalid @enderror" id="username" required value="{{ old('username') }}" placeholder="Username" aria-label="Username" aria-describedby="email-addon" />
+                  </div>
                   <div class="mb-4">
                     <input type="text" name="nama" class="text-sm focus:shadow-primary-outline leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 px-3 font-normal text-gray-700 transition-all focus:border-[#5e72e4] focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow @error('nama') is-invalid @enderror" id="nama" required value="{{ old('nama') }}" placeholder="Nama" aria-label="Nama" aria-describedby="email-addon" />
                   </div>
@@ -49,6 +54,9 @@
                   </div>
                   <div class="mb-4">
                     <input type="password" name="confirm-password" class="text-sm focus:shadow-primary-outline leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 px-3 font-normal text-gray-700 transition-all focus:border-[#5e72e4] focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow @error('confirm-password') is-invalid @enderror" id="confirm-password" required value="{{ old('confirm-password') }}" placeholder="Confirm Password" aria-label="Password" aria-describedby="password-addon" />
+                  </div>
+                  <div class="mb-4">
+                    <input type="text" name="no_telepon" class="text-sm focus:shadow-primary-outline leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 px-3 font-normal text-gray-700 transition-all focus:border-[#5e72e4] focus:bg-white focus:text-gray-700 focus:outline-none focus:transition-shadow @error('no_telepon') is-invalid @enderror" id="no_telepon" value="{{ old('no_telepon') }}" placeholder="No Telepon (Optional)" aria-label="Telepon" aria-describedby="email-addon" />
                   </div>
                   <div class="text-center">
                     <button type="submit" class="inline-block w-full px-6 py-3 mt-6 mb-2 font-bold text-center text-white uppercase align-middle transition-all bg-transparent border-0 rounded-lg cursor-pointer active:opacity-85 hover:-translate-y-px hover:shadow-md leading-normal text-xs ease-in tracking-tight-rem shadow-md bg-150 bg-x-25 bg-gradient-to-tl from-zinc-800 to-zinc-700 hover:border-slate-700 hover:bg-slate-700 hover:text-white">Sign up</button>

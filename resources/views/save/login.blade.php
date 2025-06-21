@@ -19,6 +19,7 @@
   </head>
 
   <body class="m-0 font-sans antialiased font-normal bg-white text-start text-base leading-default text-slate-500">
+    @include('sweetalert::alert')
     <main class="mt-0 transition-all duration-200 ease-in-out">
       <section>
         <a href="/"><svg class="back-button m-3" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">

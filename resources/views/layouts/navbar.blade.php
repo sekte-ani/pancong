@@ -77,7 +77,7 @@
                   @if(session('cart') && count(session('cart')) > 0)
                     @php $total = 0 @endphp
                     @foreach(session('cart') as $id => $details)
-                      @php $total += $details['harga_jual'] * $details['quantity'] @endphp
+                      @php $total += $details['harga'] * $details['qty'] @endphp
                     @endforeach
                     <small class="mobile-cart-total">Rp {{ number_format($total, 0, ',', '.') }}</small>
                   @else
@@ -102,15 +102,15 @@
               @if(session('cart') && count(session('cart')) > 0)
                 @php $total = 0 @endphp
                 @foreach(session('cart') as $id => $details)
-                  @php $total += $details['harga_jual'] * $details['quantity'] @endphp
+                  @php $total += $details['harga'] * $details['qty'] @endphp
                   <li>
                     <div class="cart-item">
-                      <img src="{{ !empty($details['foto']) ? url('admin/img/'.$details['foto']) : url('admin/img/nophoto.jpg') }}" 
-                           alt="{{ $details['nama'] }}" class="cart-item-img">
+                      <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
+                           alt="{{ $details['nama_item'] }}" class="cart-item-img">
                       <div class="cart-item-info">
-                        <div class="cart-item-name">{{ $details['nama'] }}</div>
-                        <div class="cart-item-price">Rp {{ number_format($details['harga_jual'], 0, ',', '.') }}</div>
-                        <div class="cart-item-quantity">Qty: {{ $details['quantity'] }}</div>
+                        <div class="cart-item-name">{{ $details['nama_item'] }}</div>
+                        <div class="cart-item-price">Rp {{ number_format($details['harga'], 0, ',', '.') }}</div>
+                        <div class="cart-item-quantity">Qty: {{ $details['qty'] }}</div>
                       </div>
                     </div>
                   </li>
@@ -121,7 +121,7 @@
                     <div class="cart-total-price">
                       Total: Rp {{ number_format($total, 0, ',', '.') }}
                     </div>
-                    <a href="{{ url('shop_cart') }}" class="btn-cart-view">Lihat Keranjang</a>
+                    <a href="{{ route('cart') }}" class="btn-cart-view">Lihat Keranjang</a>
                   </div>
                 </li>
               @else
@@ -158,14 +158,14 @@
               @if(session('cart') && count(session('cart')) > 0)
                 @php $total = 0 @endphp
                 @foreach(session('cart') as $id => $details)
-                  @php $total += $details['harga_jual'] * $details['quantity'] @endphp
+                  @php $total += $details['harga'] * $details['qty'] @endphp
                   <div class="cart-item">
-                    <img src="{{ !empty($details['foto']) ? url('admin/img/'.$details['foto']) : url('admin/img/nophoto.jpg') }}" 
-                         alt="{{ $details['nama'] }}" class="cart-item-img">
+                    <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
+                         alt="{{ $details['nama_item'] }}" class="cart-item-img">
                     <div class="cart-item-info">
-                      <div class="cart-item-name">{{ $details['nama'] }}</div>
-                      <div class="cart-item-price">Rp {{ number_format($details['harga_jual'], 0, ',', '.') }}</div>
-                      <div class="cart-item-quantity">Qty: {{ $details['quantity'] }}</div>
+                      <div class="cart-item-name">{{ $details['nama_item'] }}</div>
+                      <div class="cart-item-price">Rp {{ number_format($details['harga'], 0, ',', '.') }}</div>
+                      <div class="cart-item-quantity">Qty: {{ $details['qty'] }}</div>
                     </div>
                   </div>
                 @endforeach
@@ -174,7 +174,7 @@
                   <div class="cart-total-price">
                     Total: Rp {{ number_format($total, 0, ',', '.') }}
                   </div>
-                  <a href="{{ url('shop_cart') }}" class="btn-cart-view">Lihat Keranjang</a>
+                  <a href="{{ url('cart') }}" class="btn-cart-view">Lihat Keranjang</a>
                 </div>
               @else
                 <div class="empty-cart">
@@ -186,9 +186,17 @@
             </div>
           </div>
         </div>
-        <a class="btn-getstarted" href="/login">Login</a>
+        @if (Auth::user())
+          <a class="btn-getstarted" href="/logout">Logout</a>
+        @else
+          <a class="btn-getstarted" href="/login">Login</a>
+        @endif
       </div>
-    <a class="btn-getstarted d-xl-none" href="/login">Login</a>
+    @if (Auth::user())
+      <a class="btn-getstarted d-xl-none" href="/logout">Logout</a>
+    @else
+      <a class="btn-getstarted d-xl-none" href="/login">Login</a>
+    @endif
     </div>
   </header>
 
@@ -197,6 +205,7 @@
 
   <!-- Preloader -->
   <div id="preloader"></div>
+  @include('sweetalert::alert')
 
   <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
