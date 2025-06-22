@@ -56,7 +56,7 @@
                                         
                                         @if($item['type'] === 'custom')
                                             <small class="text-muted d-block">Custom Menu</small>
-                                            <small class="text-info">Base: {{ $item['base_menu_name'] }}</small>
+                                            <small class="text-muted">{{ $item['base_menu_name'] }}</small>
                                             
                                             @if(!empty($item['selected_addons']))
                                                 <div class="mt-1">

@@ -74,18 +74,32 @@
                 <i class="bi bi-cart3"></i>
                 <div class="mobile-cart-text">
                   <span>Keranjang</span>
-                  @if(session('cart') && count(session('cart')) > 0)
-                    @php $total = 0 @endphp
-                    @foreach(session('cart') as $id => $details)
-                      @php $total += $details['harga'] * $details['qty'] @endphp
-                    @endforeach
-                    <small class="mobile-cart-total">Rp {{ number_format($total, 0, ',', '.') }}</small>
+                  @php 
+                    $cart = session('cart', []);
+                    $customCart = session('custom_cart', []);
+                    $totalRegular = 0;
+                    $totalCustom = 0;
+                    
+                    foreach($cart as $item) {
+                      $totalRegular += ($item['harga'] ?? 0) * ($item['qty'] ?? 0);
+                    }
+                    
+                    foreach($customCart as $item) {
+                      $totalCustom += ($item['total_price'] ?? 0) * ($item['qty'] ?? 0);
+                    }
+                    
+                    $grandTotal = $totalRegular + $totalCustom;
+                    $totalCount = array_sum(array_column($cart, 'qty')) + array_sum(array_column($customCart, 'qty'));
+                  @endphp
+                  
+                  @if($grandTotal > 0)
+                    <small class="mobile-cart-total">Rp {{ number_format($grandTotal, 0, ',', '.') }}</small>
                   @else
                     <small class="mobile-cart-total">Kosong</small>
                   @endif
                 </div>
               </div>
-              <span class="mobile-cart-badge">{{ count((array) session('cart')) }}</span>
+              <span class="mobile-cart-badge">{{ $totalCount }}</span>
               <i class="bi bi-chevron-down toggle-dropdown"></i>
             </a>
             
@@ -94,23 +108,50 @@
                 <div class="cart-header">
                   <div class="d-flex justify-content-between align-items-center">
                     <span class="fw-bold">Keranjang Belanja</span>
-                    <span class="badge bg-danger">{{ count((array) session('cart')) }} item</span>
+                    <span class="badge bg-danger">{{ $totalCount }} item</span>
                   </div>
                 </div>
               </li>
 
-              @if(session('cart') && count(session('cart')) > 0)
-                @php $total = 0 @endphp
-                @foreach(session('cart') as $id => $details)
-                  @php $total += $details['harga'] * $details['qty'] @endphp
+              @if($totalCount > 0)
+                {{-- Regular Cart Items --}}
+                @foreach($cart as $id => $details)
                   <li>
                     <div class="cart-item">
                       <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
-                           alt="{{ $details['nama_item'] }}" class="cart-item-img">
+                           alt="{{ $details['nama_item'] ?? 'Item' }}" class="cart-item-img">
                       <div class="cart-item-info">
-                        <div class="cart-item-name">{{ $details['nama_item'] }}</div>
-                        <div class="cart-item-price">Rp {{ number_format($details['harga'], 0, ',', '.') }}</div>
-                        <div class="cart-item-quantity">Qty: {{ $details['qty'] }}</div>
+                        <div class="cart-item-name">{{ $details['nama_item'] ?? 'Unknown Item' }}</div>
+                        <div class="cart-item-price">Rp {{ number_format($details['harga'] ?? 0, 0, ',', '.') }}</div>
+                        <div class="cart-item-quantity">Qty: {{ $details['qty'] ?? 0 }}</div>
+                      </div>
+                    </div>
+                  </li>
+                @endforeach
+
+                {{-- Custom Cart Items --}}
+                @foreach($customCart as $id => $details)
+                  <li>
+                    <div class="cart-item">
+                      <img src="{{ url('admin/img/custom-pancong.jpg') }}" 
+                           alt="{{ $details['display_name'] ?? 'Custom Pancong' }}" class="cart-item-img">
+                      <div class="cart-item-info">
+                        <div class="cart-item-name">{{ $details['display_name'] ?? 'Custom Pancong' }}</div>
+                        <div class="cart-item-price">Rp {{ number_format($details['total_price'] ?? 0, 0, ',', '.') }}</div>
+                        <div class="cart-item-quantity">Qty: {{ $details['qty'] ?? 0 }}</div>
+                        @if(!empty($details['selected_addons']))
+                          <div class="cart-item-addons">
+                            <small class="text-muted">
+                              Addons: 
+                              @foreach(array_slice($details['selected_addons'], 0, 2) as $addon)
+                                {{ $addon['nama_addon'] ?? 'Addon' }}{{ !$loop->last ? ', ' : '' }}
+                              @endforeach
+                              @if(count($details['selected_addons']) > 2)
+                                +{{ count($details['selected_addons']) - 2 }} lainnya
+                              @endif
+                            </small>
+                          </div>
+                        @endif
                       </div>
                     </div>
                   </li>
@@ -119,7 +160,7 @@
                 <li>
                   <div class="cart-total">
                     <div class="cart-total-price">
-                      Total: Rp {{ number_format($total, 0, ',', '.') }}
+                      Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}
                     </div>
                     <a href="{{ route('cart') }}" class="btn-cart-view">Lihat Keranjang</a>
                   </div>
@@ -139,42 +180,68 @@
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
+      <!-- FIXED: Desktop Cart with Enhanced Structure -->
       <div class="header-actions d-none d-xl-flex">
         <div class="header-cart">
           <a href="#" class="cart-btn">
             <i class="bi bi-cart3"></i>
-            <span class="cart-badge">{{ count((array) session('cart')) }}</span>
+            <span class="cart-badge">{{ $totalCount }}</span>
           </a>
           
           <div class="cart-dropdown">
             <div class="cart-header">
               <div class="d-flex justify-content-between align-items-center">
                 <span class="fw-bold">Keranjang Belanja</span>
-                <span class="badge bg-danger">{{ count((array) session('cart')) }} item</span>
+                <span class="badge bg-danger">{{ $totalCount }} item</span>
               </div>
             </div>
 
             <div class="cart-content">
-              @if(session('cart') && count(session('cart')) > 0)
-                @php $total = 0 @endphp
-                @foreach(session('cart') as $id => $details)
-                  @php $total += $details['harga'] * $details['qty'] @endphp
+              @if($totalCount > 0)
+                {{-- Regular Cart Items --}}
+                @foreach($cart as $id => $details)
                   <div class="cart-item">
                     <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
-                         alt="{{ $details['nama_item'] }}" class="cart-item-img">
+                         alt="{{ $details['nama_item'] ?? 'Item' }}" class="cart-item-img">
                     <div class="cart-item-info">
-                      <div class="cart-item-name">{{ $details['nama_item'] }}</div>
-                      <div class="cart-item-price">Rp {{ number_format($details['harga'], 0, ',', '.') }}</div>
-                      <div class="cart-item-quantity">Qty: {{ $details['qty'] }}</div>
+                      <div class="cart-item-name">{{ $details['nama_item'] ?? 'Unknown Item' }}</div>
+                      <div class="cart-item-price">Rp {{ number_format($details['harga'] ?? 0, 0, ',', '.') }}</div>
+                      <div class="cart-item-quantity">Qty: {{ $details['qty'] ?? 0 }}</div>
+                    </div>
+                  </div>
+                @endforeach
+
+                {{-- Custom Cart Items --}}
+                @foreach($customCart as $id => $details)
+                  <div class="cart-item">
+                    <img src="{{ url('admin/img/custom-pancong.jpg') }}" 
+                         alt="{{ $details['display_name'] ?? 'Custom Pancong' }}" class="cart-item-img">
+                    <div class="cart-item-info">
+                      <div class="cart-item-name">{{ $details['display_name'] ?? 'Custom Pancong' }}</div>
+                      <div class="cart-item-price">Rp {{ number_format($details['total_price'] ?? 0, 0, ',', '.') }}</div>
+                      <div class="cart-item-quantity">Qty: {{ $details['qty'] ?? 0 }}</div>
+                      @if(!empty($details['selected_addons']))
+                        <div class="cart-item-addons">
+                          <small class="text-muted">
+                            Addons: 
+                            @foreach(array_slice($details['selected_addons'], 0, 2) as $addon)
+                              {{ $addon['nama_addon'] ?? 'Addon' }}{{ !$loop->last ? ', ' : '' }}
+                            @endforeach
+                            @if(count($details['selected_addons']) > 2)
+                              +{{ count($details['selected_addons']) - 2 }} lainnya
+                            @endif
+                          </small>
+                        </div>
+                      @endif
                     </div>
                   </div>
                 @endforeach
 
                 <div class="cart-total">
                   <div class="cart-total-price">
-                    Total: Rp {{ number_format($total, 0, ',', '.') }}
+                    Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}
                   </div>
-                  <a href="{{ url('cart') }}" class="btn-cart-view">Lihat Keranjang</a>
+                  <a href="{{ route('cart') }}" class="btn-cart-view">Lihat Keranjang</a>
                 </div>
               @else
                 <div class="empty-cart">

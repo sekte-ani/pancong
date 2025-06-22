@@ -980,6 +980,8 @@
                 const container = $("#baseMenuContainer");
                 container.empty();
 
+                console.log("Rendering base menus:", baseMenus);
+
                 if (!baseMenus || baseMenus.length === 0) {
                     container.html(
                         '<div class="col-12"><p class="text-muted text-center">Belum ada pancong polos tersedia</p></div>'
@@ -1031,6 +1033,8 @@
                             selectedBaseMenu.harga =
                                 parseFloat(selectedBaseMenu.harga) || 0;
                         }
+
+                        console.log("Selected base menu:", selectedBaseMenu);
                         updateSummary();
                     });
             }
@@ -1265,13 +1269,11 @@
                             console.log("Add to cart success:", response);
                             showToast(response.message, "success");
                             resetCustomForm();
-
-                            if (typeof updateCartBadge === "function") {
-                                updateCartBadge();
-                            } else {
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1000);
+                            if (typeof updateCartCounter === "function") {
+                                updateCartCounter(
+                                    response.cart_count,
+                                    response.cart_total
+                                );
                             }
                         },
                         error: function (xhr) {
