@@ -295,7 +295,7 @@
         if (window.location.pathname.includes("/menu")) {
             console.log("Menu page detected - Force mobile nav init");
             setTimeout(function () {
-                initMobileNav();
+                initMobileNavigation();
             }, 200);
         }
 
