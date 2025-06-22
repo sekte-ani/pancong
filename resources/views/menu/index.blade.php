@@ -13,6 +13,7 @@
   <title>Document</title>
   <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
     window.userAuth = {{ auth()->check() ? 'true' : 'false' }};
@@ -139,11 +140,78 @@
             <p>Menu</p>
             <h3>BIKIN SENDIRI</h3>
           </div>
-          <div class="row gy-5">
-            <div class="col-12 text-center py-5">
-              <i class="bi bi-tools text-primary" style="font-size: 3rem;"></i>
-              <h4 class="mt-3">Fitur Bikin Sendiri</h4>
-              <p class="text-muted">Coming Soon!</p>
+          
+          <div class="row">
+            <div class="col-12 mb-4">
+              <div class="card">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0"><i class="bi bi-1-circle me-2"></i>Pilih Pancong Polos</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row" id="baseMenuContainer">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mb-4">
+              <div class="card">
+                <div class="card-header bg-success text-white">
+                  <h5 class="mb-0"><i class="bi bi-2-circle me-2"></i>Pilih Add-ons (Maksimal 5)</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row" id="addonsContainer">
+                  </div>
+                  <div class="mt-3">
+                    <small class="text-muted">Add-ons terpilih: <span id="selectedAddonsCount">0</span>/5</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mb-4">
+              <div class="card">
+                <div class="card-header bg-warning text-white">
+                  <h5 class="mb-0"><i class="bi bi-3-circle me-2"></i>Konfirmasi Pesanan</h5>
+                </div>
+                <div class="card-body">
+                  <form id="customMenuForm">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label for="customQty" class="form-label">Jumlah</label>
+                          <div class="input-group" style="max-width: 120px;">
+                            <button class="btn btn-outline-secondary" type="button" id="qtyMinus">-</button>
+                            <input type="number" class="form-control text-center" id="customQty" name="qty" 
+                                  value="1" min="1" max="99" required>
+                            <button class="btn btn-outline-secondary" type="button" id="qtyPlus">+</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="custom-summary">
+                          <h6>Ringkasan Pesanan:</h6>
+                          <div id="summaryContent">
+                            <p class="text-muted">Pilih base menu terlebih dahulu</p>
+                          </div>
+                          <hr>
+                          <div class="d-flex justify-content-between">
+                            <strong>Total: </strong>
+                            <strong id="totalPrice">Rp 0</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-3">
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="addToCartBtn" disabled>
+                          <i class="bi bi-cart-plus me-2"></i>Tambah ke Keranjang
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -157,6 +225,22 @@
     </div>
   </div>
 
+  <script>
+    window.baseMenus = @json($baseMenus ?? []);
+    window.addons = @json($addons ?? []);
+
+    if (window.baseMenus) {
+        window.baseMenus.forEach(menu => {
+            menu.harga = parseFloat(menu.harga) || 0;
+        });
+    }
+
+    if (window.addons) {
+        window.addons.forEach(addon => {
+            addon.harga_addon = parseFloat(addon.harga_addon) || 0;
+        });
+    }
+  </script>
   <script src="{{ asset('assets/js/main.js') }}"></script>
 </body>
 

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Menu;
+use App\Models\Addon;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
@@ -21,13 +22,18 @@ class MenuController extends Controller
 
         $menus = $query->get();
         $categories = Category::withCount('menus')->get();
+
+        $baseMenus = Menu::canBeBase()->with('category')->get();
+        $addons = Addon::active()->get();
         
         $menusByCategory = $menus->groupBy('category.nama_kategori');
         
         return view('menu.index', compact([
             'menus',
             'categories',
-            'menusByCategory'
+            'menusByCategory',
+            'baseMenus',
+            'addons'
         ]));
     }
 

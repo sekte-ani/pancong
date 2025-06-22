@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Gallery;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\CustomOrderItem;
 use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
@@ -313,4 +315,75 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Status pesanan berhasil diupdate!');
     }
     // ORDER END
+
+    // ADDON MANAGEMENT START
+    public function indexAddon()
+    {
+        $addons = Addon::latest()->paginate(10);
+        return view('admin.addon.index', compact('addons'));
+    }
+
+    public function createAddon()
+    {
+        return view('admin.addon.createAddon');
+    }
+
+    public function storeAddon(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nama_addon' => 'required|string|max:100',
+            'harga_addon' => 'required|numeric|min:0',
+            'deskripsi' => 'nullable|string|max:500',
+            'is_active' => 'boolean'
+        ]);
+
+        $validatedData['is_active'] = $request->has('is_active');
+
+        Addon::create($validatedData);
+
+        return redirect()->route('admin.addon')->with('success', 'Berhasil Menambahkan Add-on Baru');
+    }
+
+    public function showAddon(Addon $addon)
+    {
+        return view('admin.addon.showAddon', compact('addon'));
+    }
+
+    public function editAddon(Addon $addon)
+    {
+        return view('admin.addon.editAddon', compact('addon'));
+    }
+
+    public function updateAddon(Request $request, Addon $addon)
+    {
+        $validatedData = $request->validate([
+            'nama_addon' => 'required|string|max:100',
+            'harga_addon' => 'required|numeric|min:0',
+            'deskripsi' => 'nullable|string|max:500',
+            'is_active' => 'boolean'
+        ]);
+
+        $validatedData['is_active'] = $request->has('is_active');
+
+        $addon->update($validatedData);
+
+        return redirect()->route('admin.addon')->with('success', 'Berhasil Mengedit Add-on');
+    }
+
+    public function destroyAddon(Addon $addon)
+    {
+        $activeUsage = CustomOrderItem::whereJsonContains('selected_addons', ['id' => $addon->id])
+            ->whereHas('order', function($query) {
+                $query->whereIn('status', ['Pending', 'Paid', 'Process']);
+            })->count();
+
+        if ($activeUsage > 0) {
+            return redirect()->route('admin.addon')->with('error', 'Add-on tidak bisa dihapus karena masih digunakan di pesanan aktif!');
+        }
+
+        $addon->delete();
+
+        return redirect()->route('admin.addon')->with('success', 'Berhasil Menghapus Add-on');
+    }
+    // ADDON MANAGEMENT END
 }

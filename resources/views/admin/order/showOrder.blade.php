@@ -4,8 +4,6 @@
 <section class="row">
     <div class="col card px-3 py-3">
         <div class="my-3 p-3 rounded">
-            
-            <!-- Info Pesanan -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h4>Informasi Pesanan</h4>
@@ -90,12 +88,46 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($order->orderItems as $o)
+                            @foreach($order->orderItems as $item)
                             <tr>
-                                <td>{{ $o->menu->nama_item }}</td>
-                                <td>Rp {{ number_format($o->harga, 0, ',', '.') }}</td>
-                                <td>{{ $o->qty }}</td>
-                                <td>Rp {{ number_format($o->total, 0, ',', '.') }}</td>
+                                <td>
+                                    <strong>{{ $item->menu->nama_item }}</strong>
+                                    <small class="text-muted d-block">Menu Regular</small>
+                                </td>
+                                <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                <td>{{ $item->qty }}</td>
+                                <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+
+                            @foreach($order->customOrderItems as $customItem)
+                            <tr>
+                                <td>
+                                    <strong>{{ $customItem->display_name }}</strong>
+                                    <small class="text-muted d-block">Custom Menu</small>
+                                    <div class="mt-1">
+                                        <small class="text-info">Base: {{ $customItem->baseMenu->nama_item }}</small>
+                                        @if($customItem->selected_addons_details->isNotEmpty())
+                                            <div class="mt-1">
+                                                <small class="text-success">Add-ons:</small>
+                                                @foreach($customItem->selected_addons_details as $addon)
+                                                    <span class="badge bg-light text-dark me-1">
+                                                        {{ $addon['nama_addon'] }} ({{ $addon['qty'] }}x)
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>Rp {{ number_format($customItem->base_price + $customItem->addons_price, 0, ',', '.') }}</div>
+                                    <small class="text-muted">
+                                        Base: Rp {{ number_format($customItem->base_price, 0, ',', '.') }}<br>
+                                        Add-ons: Rp {{ number_format($customItem->addons_price, 0, ',', '.') }}
+                                    </small>
+                                </td>
+                                <td>{{ $customItem->qty }}</td>
+                                <td>Rp {{ number_format($customItem->total_price, 0, ',', '.') }}</td>
                             </tr>
                             @endforeach
                         </tbody>

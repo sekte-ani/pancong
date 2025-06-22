@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('addons', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_addon');
+            $table->decimal('harga_addon', 10, 2);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

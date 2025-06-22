@@ -38,36 +38,69 @@
                         </div>
                         <div class="card-body">
                             @foreach($cartItems as $item)
-                                <div class="row align-items-center border-bottom py-3 cart-item" data-item="{{ $item['id_item'] }}">
-                                    <div class="col-md-2">
-                                        <img src="{{ $item['gambar'] ? asset('gambar-menu/'.$item['gambar']) : 'https://picsum.photos/seed/pancong/100/100' }}" 
-                                            class="img-fluid rounded" alt="{{ $item['nama_item'] }}" style="height: 80px; object-fit: cover;">
+                                <div class="row cart-item align-items-center py-3 border-bottom" data-item="{{ $item['id_item'] }}">
+                                    <div class="col-md-2 col-3">
+                                        @if($item['type'] === 'regular')
+                                            <img src="{{ $item['gambar'] ? asset('gambar-menu/'.$item['gambar']) : asset('assets/img/menu/menu-item-2.png') }}" 
+                                                class="img-fluid rounded" alt="{{ $item['nama_item'] }}">
+                                        @else
+                                            <div class="custom-menu-icon bg-light rounded d-flex align-items-center justify-content-center" 
+                                                style="width: 80px; height: 80px;">
+                                                <i class="bi bi-plus-square text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div class="col-md-4">
-                                        <h6 class="mb-0">{{ $item['nama_item'] }}</h6>
-                                        <small class="text-muted">{{ $item['kategori'] }}</small>
+                                    
+                                    <div class="col-md-4 col-9">
+                                        <h6 class="mb-1">{{ $item['display_name'] ?? $item['nama_item'] }}</h6>
+                                        
+                                        @if($item['type'] === 'custom')
+                                            <small class="text-muted d-block">Custom Menu</small>
+                                            <small class="text-info">Base: {{ $item['base_menu_name'] }}</small>
+                                            
+                                            @if(!empty($item['selected_addons']))
+                                                <div class="mt-1">
+                                                    <small class="text-success">Add-ons:</small>
+                                                    @foreach($item['selected_addons'] as $addon)
+                                                        <span class="badge bg-light text-dark me-1 mb-1">
+                                                            {{ $addon['nama_addon'] }} ({{ $addon['qty'] }}x)
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            
+                                            <div class="mt-1">
+                                                <small class="text-muted">
+                                                    Base: Rp {{ number_format($item['base_price'], 0, ',', '.') }} | 
+                                                    Add-ons: Rp {{ number_format($item['addons_price'], 0, ',', '.') }}
+                                                </small>
+                                            </div>
+                                        @else
+                                            <small class="text-muted">{{ $item['kategori'] ?? 'Menu Regular' }}</small>
+                                        @endif
                                     </div>
-                                    <div class="col-md-2">
-                                        <p class="mb-0 fw-bold">Rp {{ number_format($item['harga'], 0, ',', '.') }}</p>
+                                    
+                                    <div class="col-md-2 col-4">
+                                        <p class="fw-bold mb-0">Rp {{ number_format($item['harga'], 0, ',', '.') }}</p>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="input-group">
-                                            <button class="btn btn-outline-secondary btn-sm update-qty" 
-                                                    data-item="{{ $item['id_item'] }}" data-action="decrease">
-                                                <i class="bi bi-dash"></i>
-                                            </button>
-                                            <input type="number" class="form-control form-control-sm text-center qty-input" 
-                                                value="{{ $item['qty'] }}" min="0" max="99" 
-                                                data-item="{{ $item['id_item'] }}">
-                                            <button class="btn btn-outline-secondary btn-sm update-qty" 
-                                                    data-item="{{ $item['id_item'] }}" data-action="increase">
-                                                <i class="bi bi-plus"></i>
-                                            </button>
+                                    
+                                    <div class="col-md-2 col-4">
+                                        <div class="input-group input-group-sm" style="width: 100px;">
+                                            <button class="btn btn-outline-secondary qty-btn" type="button" 
+                                                    data-action="decrease" data-item="{{ $item['id_item'] }}" data-type="{{ $item['type'] }}">-</button>
+                                            <input type="number" class="form-control text-center qty-input" 
+                                                value="{{ $item['qty'] }}" min="1" max="99" 
+                                                data-item="{{ $item['id_item'] }}" data-type="{{ $item['type'] }}">
+                                            <button class="btn btn-outline-secondary qty-btn" type="button" 
+                                                    data-action="increase" data-item="{{ $item['id_item'] }}" data-type="{{ $item['type'] }}">+</button>
                                         </div>
                                     </div>
-                                    <div class="col-md-1">
-                                        <button class="btn btn-outline-danger btn-sm remove-item" data-item="{{ $item['id_item'] }}">
-                                            <i class="bi bi-trash"></i>
+                                    
+                                    <div class="col-md-2 col-4">
+                                        <p class="fw-bold mb-0">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</p>
+                                        <button class="btn btn-sm btn-outline-danger remove-item mt-1" 
+                                                data-item="{{ $item['id_item'] }}" data-type="{{ $item['type'] }}">
+                                            <i class="bi bi-trash"></i> Hapus
                                         </button>
                                     </div>
                                 </div>

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\User;
+use App\Models\Addon;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -75,6 +76,66 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ]));
+        }
+
+        $addons = [
+            [
+                'nama_addon' => 'Keju Cheddar',
+                'harga_addon' => 3000,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Coklat Nutella',
+                'harga_addon' => 4000,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Strawberry Jam',
+                'harga_addon' => 2500,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Susu Kental Manis',
+                'harga_addon' => 2000,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Meses Coklat',
+                'harga_addon' => 1500,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Mentega',
+                'harga_addon' => 1000,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Pisang',
+                'harga_addon' => 3500,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Kacang Tanah',
+                'harga_addon' => 2000,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Oreo Crumble',
+                'harga_addon' => 3500,
+                'is_active' => true
+            ],
+            [
+                'nama_addon' => 'Es Krim Vanilla',
+                'harga_addon' => 5000,
+                'is_active' => false
+            ]
+        ];
+
+        foreach ($addons as $addon) {
+            Addon::firstOrCreate(
+                ['nama_addon' => $addon['nama_addon']],
+                $addon
+            );
         }
     }
 }

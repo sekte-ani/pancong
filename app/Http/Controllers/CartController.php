@@ -104,46 +104,93 @@ class CartController extends Controller
     public function removeFromCart(Request $request)
     {
         $request->validate([
-            'menu_id' => 'required|exists:menus,id_item'
+            'menu_id' => 'required',
+            'type' => 'required|in:regular,custom'
         ]);
-
-        $cart = Session::get('cart', []);
         
-        if (!isset($cart[$request->menu_id])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Item tidak ditemukan di keranjang!'
-            ], 404);
+        if ($request->type === 'regular') {
+            $request->validate([
+                'menu_id' => 'required|exists:menus,id_item'
+            ]);
+
+            $cart = Session::get('cart', []);
+            
+            if (!isset($cart[$request->menu_id])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item tidak ditemukan di keranjang!'
+                ], 404);
+            }
+
+            $menuName = $cart[$request->menu_id]['nama_item'];
+            unset($cart[$request->menu_id]);
+            Session::put('cart', $cart);
+        } else {
+            $customCart = Session::get('custom_cart', []);
+            
+            if (!isset($customCart[$request->menu_id])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item tidak ditemukan di keranjang!'
+                ], 404);
+            }
+
+            $menuName = $customCart[$request->menu_id]['display_name'];
+            unset($customCart[$request->menu_id]);
+            Session::put('custom_cart', $customCart);
         }
-
-        $menuName = $cart[$request->menu_id]['nama_item'];
-        unset($cart[$request->menu_id]);
-        Session::put('cart', $cart);
-
-        $totalMenus = array_sum(array_column($cart, 'qty'));
-        $totalPrice = 0;
+        
+        $cart = Session::get('cart', []);
+        $customCart = Session::get('custom_cart', []);
+        
+        $totalMenus = array_sum(array_column($cart, 'qty')) + 
+                    array_sum(array_column($customCart, 'qty'));
+        
+        $totalCartPrice = 0;
         foreach ($cart as $cartItem) {
-            $totalPrice += $cartItem['harga'] * $cartItem['qty'];
+            $totalCartPrice += $cartItem['harga'] * $cartItem['qty'];
+        }
+        foreach ($customCart as $customCartItem) {
+            $totalCartPrice += $customCartItem['total_price'] * $customCartItem['qty'];
         }
 
         return response()->json([
             'success' => true,
             'message' => $menuName . ' dihapus dari keranjang!',
             'cart_count' => $totalMenus,
-            'cart_total' => $totalPrice
+            'cart_total' => $totalCartPrice
         ]);
     }
 
     public function viewCart()
     {
         $cart = Session::get('cart', []);
+        $customCart = Session::get('custom_cart', []);
         
         $cartItems = [];
         $totalPrice = 0;
         
         foreach ($cart as $menu) {
             $subtotal = $menu['harga'] * $menu['qty'];
-            $cartItems[] = array_merge($menu, ['subtotal' => $subtotal]);
+            $cartItems[] = array_merge($menu, [
+                'type' => 'regular',
+                'subtotal' => $subtotal
+            ]);
+            $totalPrice += $subtotal;
+        }
+        
+        foreach ($customCart as $customMenu) {
+            $subtotal = $customMenu['total_price'] * $customMenu['qty'];
+            $cartItems[] = [
+                'type' => 'custom',
+                'id_item' => $customMenu['id'],
+                'nama_item' => $customMenu['display_name'],
+                'harga' => $customMenu['total_price'],
+                'qty' => $customMenu['qty'],
+                'subtotal' => $subtotal,
+                'base_menu_name' => $customMenu['base_menu_name'],
+                'selected_addons' => $customMenu['selected_addons']
+            ];
             $totalPrice += $subtotal;
         }
 
@@ -155,7 +202,7 @@ class CartController extends Controller
 
     public function clearCart()
     {
-        Session::forget('cart');
+        Session::forget(['cart', 'custom_cart']);
         
         return response()->json([
             'success' => true,
@@ -168,6 +215,7 @@ class CartController extends Controller
     public function getCartSummary()
     {
         $cart = Session::get('cart', []);
+        $customCart = Session::get('custom_cart', []);
         
         $totalMenus = array_sum(array_column($cart, 'qty'));
         $totalPrice = 0;
@@ -175,12 +223,24 @@ class CartController extends Controller
         foreach ($cart as $menu) {
             $totalPrice += $menu['harga'] * $menu['qty'];
         }
+        
+        $totalCustomMenus = array_sum(array_column($customCart, 'qty'));
+        $totalCustomPrice = 0;
+        
+        foreach ($customCart as $customMenu) {
+            $totalCustomPrice += $customMenu['total_price'] * $customMenu['qty'];
+        }
+        
+        $grandTotalMenus = $totalMenus + $totalCustomMenus;
+        $grandTotalPrice = $totalPrice + $totalCustomPrice;
 
         $cartPreview = [];
         $count = 0;
+        
         foreach ($cart as $menu) {
             if ($count < 5) {
                 $cartPreview[] = [
+                    'type' => 'regular',
                     'nama_item' => $menu['nama_item'],
                     'qty' => $menu['qty'],
                     'harga' => $menu['harga'],
@@ -189,13 +249,26 @@ class CartController extends Controller
                 $count++;
             }
         }
+        
+        foreach ($customCart as $customMenu) {
+            if ($count < 5) {
+                $cartPreview[] = [
+                    'type' => 'custom',
+                    'nama_item' => $customMenu['display_name'] ?? 'Custom Pancong',
+                    'qty' => $customMenu['qty'],
+                    'harga' => $customMenu['total_price'],
+                    'gambar' => null
+                ];
+                $count++;
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'cart_count' => $totalMenus,
-            'cart_total' => $totalPrice,
+            'cart_count' => $grandTotalMenus,
+            'cart_total' => $grandTotalPrice,
             'cart_preview' => $cartPreview,
-            'has_more' => count($cart) > 5
+            'has_more' => (count($cart) + count($customCart)) > 5
         ]);
     }
 

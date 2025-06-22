@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\CustomOrderItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
@@ -39,9 +40,50 @@ class Order extends Model
 
     public function calculateTotal()
     {
-        $total = $this->orderItems()->sum('total');
-        $this->update(['total_harga' => $total]);
-        return $total;
+        $regularTotal = $this->orderItems()->sum('total');
+        $customTotal = $this->customOrderItems()->sum('total_price');
+        
+        $grandTotal = $regularTotal + $customTotal;
+        $this->update(['total_harga' => $grandTotal]);
+        
+        return $grandTotal;
+    }
+
+    public function getAllItemsAttribute()
+    {
+        $regularItems = $this->orderItems()->with('menu')->get()->map(function($item) {
+            return [
+                'type' => 'regular',
+                'id' => $item->id,
+                'name' => $item->menu->nama_item,
+                'qty' => $item->qty,
+                'price' => $item->harga,
+                'total' => $item->total,
+                'details' => null
+            ];
+        });
+
+        $customItems = $this->customOrderItems()->with('baseMenu')->get()->map(function($item) {
+            return [
+                'type' => 'custom',
+                'id' => $item->id,
+                'name' => $item->display_name,
+                'qty' => $item->qty,
+                'price' => $item->base_price + $item->addons_price,
+                'total' => $item->total_price,
+                'details' => [
+                    'base_menu' => $item->baseMenu->nama_item,
+                    'addons' => $item->selected_addons_details
+                ]
+            ];
+        });
+
+        return $regularItems->concat($customItems);
+    }
+
+    public function customOrderItems()
+    {
+        return $this->hasMany(CustomOrderItem::class, 'order_id', 'id_pesanan');
     }
 
     public function scopeStatus($query, $status)

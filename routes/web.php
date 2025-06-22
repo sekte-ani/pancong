@@ -10,6 +10,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\CustomMenuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,12 @@ Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search
 Route::get('/menu/category', [MenuController::class, 'getByCategory'])->name('menu.category');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
+
+// CUSTOM MENU
+Route::middleware(['auth'])->group(function () {
+    Route::post('/custom-menu/add-to-cart', [CustomMenuController::class, 'addToCart'])->name('custom.menu.add');
+    Route::put('/custom-menu/update-cart', [CustomMenuController::class, 'updateCart'])->name('custom.menu.update');
+});
 
 // CART
 Route::get('/cart', [CartController::class, 'viewCart'])->name('cart');
@@ -85,6 +92,14 @@ Route::prefix('/admin')->middleware(['auth', 'verified', 'admin'])->group(functi
     Route::get('/editMenu/{menu}', [AdminController::class, 'editMenu'])->name('admin.editMenu');
     Route::put('/updateMenu/{id}', [AdminController::class, 'updateMenu'])->name('admin.updateMenu');
     Route::delete('/deleteMenu/{menu}', [AdminController::class, 'destroyMenu'])->name('admin.deleteMenu');
+
+    Route::get('/addon', [AdminController::class, 'indexAddon'])->name('admin.addon');
+    Route::get('/addon/create', [AdminController::class, 'createAddon'])->name('admin.createAddon');
+    Route::post('/addon/store', [AdminController::class, 'storeAddon'])->name('admin.storeAddon');
+    Route::get('/addon/{addon}', [AdminController::class, 'showAddon'])->name('admin.showAddon');
+    Route::get('/addon/{addon}/edit', [AdminController::class, 'editAddon'])->name('admin.editAddon');
+    Route::put('/addon/{addon}', [AdminController::class, 'updateAddon'])->name('admin.updateAddon');
+    Route::delete('/addon/{addon}', [AdminController::class, 'destroyAddon'])->name('admin.destroyAddon');
 
     Route::get('/pesanan', [AdminController::class, 'indexOrder'])->name('admin.order');
     Route::get('/showPesanan/{order}', [AdminController::class, 'showOrder'])->name('admin.showOrder');

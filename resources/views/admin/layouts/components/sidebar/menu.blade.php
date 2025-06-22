@@ -31,6 +31,17 @@
 
 <li class="sidebar-item {{ 
     in_array(Route::currentRouteName(), [
+        'admin.addon', 'admin.createAddon', 'admin.editAddon', 'admin.showAddon'
+    ]) ? 'active' : '' 
+}}">
+    <a href="{{ route('admin.addon') }}" class='sidebar-link'>
+        <i class="bi bi-plus-square-fill"></i>
+        <span>Add-ons</span>
+    </a>
+</li>
+
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
         'admin.order', 'admin.showOrder'
     ]) ? 'active' : '' 
 }}">

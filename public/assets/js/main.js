@@ -958,5 +958,355 @@
 
     $("head").append(styles);
 
-    console.log("All functionality initialized successfully");
+    $(document).ready(function () {
+        if ($("#menu-breakfast").length > 0) {
+            let selectedBaseMenu = null;
+            let selectedAddons = [];
+            let maxAddons = 5;
+
+            initializeCustomMenu();
+
+            function initializeCustomMenu() {
+                if (
+                    typeof window.baseMenus !== "undefined" &&
+                    typeof window.addons !== "undefined"
+                ) {
+                    renderBaseMenus(window.baseMenus);
+                    renderAddons(window.addons);
+                }
+            }
+
+            function renderBaseMenus(baseMenus) {
+                const container = $("#baseMenuContainer");
+                container.empty();
+
+                if (!baseMenus || baseMenus.length === 0) {
+                    container.html(
+                        '<div class="col-12"><p class="text-muted text-center">Belum ada pancong polos tersedia</p></div>'
+                    );
+                    return;
+                }
+
+                baseMenus.forEach((menu) => {
+                    const menuCard = `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div class="card base-menu-card" data-menu-id="${
+                        menu.id_item
+                    }" style="cursor: pointer;">
+                        <img src="${
+                            menu.gambar
+                                ? "/gambar-menu/" + menu.gambar
+                                : "/assets/img/menu/menu-item-2.png"
+                        }" 
+                             class="card-img-top" alt="${menu.nama_item}">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">${menu.nama_item}</h6>
+                            <p class="card-text text-muted small mb-1">${
+                                menu.category.nama_kategori
+                            }</p>
+                            <p class="card-text fw-bold small mb-0">Rp ${formatNumber(
+                                menu.harga
+                            )}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+                    container.append(menuCard);
+                });
+
+                $(".base-menu-card")
+                    .off("click")
+                    .on("click", function () {
+                        $(".base-menu-card").removeClass(
+                            "border-primary bg-light"
+                        );
+                        $(this).addClass("border-primary bg-light");
+
+                        const menuId = $(this).data("menu-id");
+                        selectedBaseMenu = baseMenus.find(
+                            (menu) => menu.id_item == menuId
+                        );
+
+                        if (selectedBaseMenu) {
+                            selectedBaseMenu.harga =
+                                parseFloat(selectedBaseMenu.harga) || 0;
+                        }
+                        updateSummary();
+                    });
+            }
+
+            function renderAddons(addons) {
+                const container = $("#addonsContainer");
+                container.empty();
+
+                console.log("Rendering addons:", addons);
+
+                if (!addons || addons.length === 0) {
+                    container.html(
+                        '<div class="col-12"><p class="text-muted text-center">Belum ada add-ons tersedia</p></div>'
+                    );
+                    return;
+                }
+
+                addons.forEach((addon) => {
+                    const addonCard = `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div class="card addon-card" data-addon-id="${addon.id}">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">${addon.nama_addon}</h6>
+                            <p class="card-text fw-bold small mb-2">Rp ${formatNumber(
+                                addon.harga_addon
+                            )}</p>
+                            ${
+                                addon.deskripsi
+                                    ? `<p class="card-text text-muted small mb-2">${addon.deskripsi}</p>`
+                                    : ""
+                            }
+                            <div class="addon-controls">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary addon-minus" type="button">-</button>
+                                    <input type="number" class="form-control text-center addon-qty" value="0" min="0" max="5" readonly>
+                                    <button class="btn btn-outline-secondary addon-plus" type="button">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                    container.append(addonCard);
+                });
+
+                $(".addon-plus")
+                    .off("click")
+                    .on("click", function () {
+                        const card = $(this).closest(".addon-card");
+                        const qtyInput = card.find(".addon-qty");
+                        const currentQty = parseInt(qtyInput.val());
+                        const addonId = card.data("addon-id");
+
+                        if (
+                            selectedAddons.length >= maxAddons &&
+                            currentQty === 0
+                        ) {
+                            showToast(
+                                `Maksimal ${maxAddons} add-ons`,
+                                "warning"
+                            );
+                            return;
+                        }
+
+                        if (currentQty < 5) {
+                            qtyInput.val(currentQty + 1);
+                            updateSelectedAddons(
+                                addonId,
+                                currentQty + 1,
+                                addons
+                            );
+                        }
+                    });
+
+                $(".addon-minus")
+                    .off("click")
+                    .on("click", function () {
+                        const card = $(this).closest(".addon-card");
+                        const qtyInput = card.find(".addon-qty");
+                        const currentQty = parseInt(qtyInput.val());
+                        const addonId = card.data("addon-id");
+
+                        if (currentQty > 0) {
+                            qtyInput.val(currentQty - 1);
+                            updateSelectedAddons(
+                                addonId,
+                                currentQty - 1,
+                                addons
+                            );
+                        }
+                    });
+            }
+
+            function updateSelectedAddons(addonId, qty, addons) {
+                const addon = addons.find((a) => a.id == addonId);
+                const existingIndex = selectedAddons.findIndex(
+                    (a) => a.id == addonId
+                );
+
+                if (qty === 0) {
+                    if (existingIndex > -1) {
+                        selectedAddons.splice(existingIndex, 1);
+                    }
+                } else {
+                    if (existingIndex > -1) {
+                        selectedAddons[existingIndex].qty = qty;
+                    } else {
+                        selectedAddons.push({
+                            id: addon.id,
+                            nama_addon: addon.nama_addon,
+                            harga_addon: parseFloat(addon.harga_addon) || 0,
+                            qty: qty,
+                        });
+                    }
+                }
+
+                $("#selectedAddonsCount").text(selectedAddons.length);
+                updateSummary();
+            }
+
+            function updateSummary() {
+                const summaryContent = $("#summaryContent");
+
+                if (!selectedBaseMenu) {
+                    summaryContent.html(
+                        '<p class="text-muted">Pilih base menu terlebih dahulu</p>'
+                    );
+                    $("#totalPrice").text("Rp 0");
+                    $("#addToCartBtn").prop("disabled", true);
+                    return;
+                }
+
+                const basePrice = parseFloat(selectedBaseMenu.harga) || 0;
+
+                let html = `<p><strong>Base:</strong> ${
+                    selectedBaseMenu.nama_item
+                } - Rp ${formatNumber(basePrice)}</p>`;
+
+                let addonsPrice = 0;
+                if (selectedAddons.length > 0) {
+                    html +=
+                        '<p><strong>Add-ons:</strong></p><ul class="list-unstyled ms-3">';
+                    selectedAddons.forEach((addon) => {
+                        const addonPrice = parseFloat(addon.harga_addon) || 0;
+                        const addonQty = parseInt(addon.qty) || 0;
+                        const subtotal = addonPrice * addonQty;
+                        addonsPrice += subtotal;
+                        html += `<li>• ${
+                            addon.nama_addon
+                        } (${addonQty}x) - Rp ${formatNumber(subtotal)}</li>`;
+                    });
+                    html += "</ul>";
+                }
+
+                const qty = parseInt($("#customQty").val()) || 1;
+
+                const totalPerItem = basePrice + addonsPrice;
+                const grandTotal = totalPerItem * qty;
+
+                console.log("Calculation debug:", {
+                    basePrice: basePrice,
+                    addonsPrice: addonsPrice,
+                    totalPerItem: totalPerItem,
+                    qty: qty,
+                    grandTotal: grandTotal,
+                });
+
+                summaryContent.html(html);
+                $("#totalPrice").text("Rp " + formatNumber(grandTotal));
+                $("#addToCartBtn").prop("disabled", false);
+            }
+
+            $("#qtyMinus")
+                .off("click")
+                .on("click", function () {
+                    const qtyInput = $("#customQty");
+                    const currentQty = parseInt(qtyInput.val());
+                    if (currentQty > 1) {
+                        qtyInput.val(currentQty - 1);
+                        updateSummary();
+                    }
+                });
+
+            $("#qtyPlus")
+                .off("click")
+                .on("click", function () {
+                    const qtyInput = $("#customQty");
+                    const currentQty = parseInt(qtyInput.val());
+                    if (currentQty < 99) {
+                        qtyInput.val(currentQty + 1);
+                        updateSummary();
+                    }
+                });
+
+            $("#customQty").on("input", function () {
+                updateSummary();
+            });
+
+            $("#customMenuForm")
+                .off("submit")
+                .on("submit", function (e) {
+                    e.preventDefault();
+
+                    if (!selectedBaseMenu) {
+                        showToast("Pilih base menu terlebih dahulu", "warning");
+                        return;
+                    }
+
+                    if (!window.userAuth || window.userAuth === "false") {
+                        window.location.href = window.loginUrl;
+                        return;
+                    }
+
+                    const formData = {
+                        base_menu_id: selectedBaseMenu.id_item,
+                        selected_addons: selectedAddons,
+                        qty: parseInt($("#customQty").val()),
+                    };
+
+                    console.log("Sending form data:", formData);
+
+                    $.ajax({
+                        url: "/custom-menu/add-to-cart",
+                        type: "POST",
+                        data: formData,
+                        headers: {
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                                "content"
+                            ),
+                        },
+                        success: function (response) {
+                            console.log("Add to cart success:", response);
+                            showToast(response.message, "success");
+                            resetCustomForm();
+
+                            if (typeof updateCartBadge === "function") {
+                                updateCartBadge();
+                            } else {
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error("Add to cart error:", xhr);
+                            const response = xhr.responseJSON;
+                            showToast(
+                                response?.message || "Terjadi kesalahan",
+                                "error"
+                            );
+                        },
+                    });
+                });
+
+            function resetCustomForm() {
+                selectedBaseMenu = null;
+                selectedAddons = [];
+                $(".base-menu-card").removeClass("border-primary bg-light");
+                $(".addon-qty").val(0);
+                $("#customQty").val(1);
+                $("#selectedAddonsCount").text("0");
+                updateSummary();
+            }
+
+            function formatNumber(num) {
+                return new Intl.NumberFormat("id-ID", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }).format(num);
+            }
+
+            function showToast(message, type = "success") {
+                $("#toastMessage").text(message);
+                const toast = new bootstrap.Toast($("#cartToast")[0]);
+                toast.show();
+            }
+        }
+    });
 })();
