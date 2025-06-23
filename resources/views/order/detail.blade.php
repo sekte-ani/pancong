@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <section class="order-detail section" style="margin-top: 120px;">
+  <section class="order-detail section">
     <div class="container">
       <div class="section-title text-center mb-5">
         <h2><i class="bi bi-receipt"></i> Detail Pesanan #{{ $order->id_pesanan }}</h2>
@@ -136,7 +136,7 @@
                 @foreach($order->customOrderItems as $item)
                   <div class="row mb-3 border-bottom pb-3">
                     <div class="col-2">
-                      <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                      <img src="{{ asset('admin/img/nophoto.jpg') }}" 
                            alt="Custom Pancong" class="img-fluid rounded">
                     </div>
                     <div class="col-6">

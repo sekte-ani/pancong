@@ -110,7 +110,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                                        <img src="{{ asset('admin/img/nophoto.jpg') }}" 
                                              alt="Custom Pancong" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                         <div>
                                             <h6 class="mb-0">{{ $item->display_name }}</h6>

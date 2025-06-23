@@ -65,7 +65,7 @@
                            alt="Custom Pancong" class="img-fluid rounded">
                     </div>
                     <div class="col-6">
-                      <h6 class="mb-1">{{ $item['nama_item'] }}</h6>
+                      <h6 class="mb-1">{{ $item['display_name'] }}</h6>
                       <p class="text-muted mb-0">Qty: {{ $item['qty'] }}</p>
                       @if(!empty($item['selected_addons']))
                         <small class="text-info">
