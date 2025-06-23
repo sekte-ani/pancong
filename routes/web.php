@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function(){
     Route::post('/checkout', [OrderController::class, 'storeOrder'])->name('checkout.store');
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('my.orders');
     Route::get('/order/{order}', [OrderController::class, 'showOrder'])->name('order.show');
+    Route::get('/order/{order}/status', [OrderController::class, 'getOrderStatus'])->name('order.status');
 });
 
 // ADMIN
@@ -101,7 +102,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified', 'admin'])->group(functi
     Route::put('/addon/{addon}', [AdminController::class, 'updateAddon'])->name('admin.updateAddon');
     Route::delete('/addon/{addon}', [AdminController::class, 'destroyAddon'])->name('admin.destroyAddon');
 
-    Route::get('/pesanan', [AdminController::class, 'indexOrder'])->name('admin.order');
-    Route::get('/showPesanan/{order}', [AdminController::class, 'showOrder'])->name('admin.showOrder');
-    Route::patch('/pesanan/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.updateOrderStatus');
+    Route::get('/orders', [AdminController::class, 'indexOrder'])->name('admin.order');
+    Route::get('/order/{order}', [AdminController::class, 'showOrder'])->name('admin.showOrder');
+    Route::patch('/order/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.updateOrderStatus');
+    Route::delete('/order/{order}', [AdminController::class, 'deleteOrder'])->name('admin.deleteOrder');
 });

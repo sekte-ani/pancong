@@ -290,10 +290,11 @@
     document.addEventListener("scroll", navmenuScrollspy);
 
     $(document).ready(function () {
-        console.log("jQuery Ready - Initializing all functionality");
+        initializeAllFunctionality();
+    });
 
+    function initializeAllFunctionality() {
         if (window.location.pathname.includes("/menu")) {
-            console.log("Menu page detected - Force mobile nav init");
             setTimeout(function () {
                 initMobileNavigation();
             }, 200);
@@ -304,37 +305,56 @@
         initializeCartPageFunctionality();
         initializeCustomMenuFunctionality();
         initializeNavbarCartFunctionality();
+        initializeCheckoutFunctionality();
+        initializeOrderTracking();
+        initializeMyOrdersFunctionality();
 
         updateCartBadge();
-    });
+    }
 
     function initializeCartFunctionality() {
-        console.log("Initializing cart functionality");
+        $(document).off("click.cart", ".cart-icon");
+        $(document).on("click.cart", ".cart-icon", function (e) {
+            e.preventDefault();
 
-        $(document)
-            .off("click", ".add-to-cart-btn")
-            .on("click", ".add-to-cart-btn", function (e) {
-                e.preventDefault();
-                console.log("Add to cart button clicked");
-
-                if (window.userAuth !== "true") {
+            if (!isUserLoggedIn()) {
+                if (typeof window.loginUrl !== "undefined" && window.loginUrl) {
                     window.location.href = window.loginUrl;
-                    return;
+                } else {
+                    window.location.href = "/login";
                 }
+                return;
+            }
 
-                const menuId = $(this).data("menu-id");
-                const qtyElement = $(this)
-                    .closest(".menu-item")
-                    .find(".quantity-display");
-                const qty = parseInt(qtyElement.text()) || 1;
+            const menuId = $(this).data("menu-id");
+            const qtyElement = $(`.count[data-menu-id="${menuId}"]`);
+            const qty = parseInt(qtyElement.text()) || 0;
 
-                if (qty <= 0) {
-                    showToast("Pilih jumlah item terlebih dahulu!");
-                    return;
-                }
+            if (qty <= 0) {
+                showToast("Pilih jumlah item terlebih dahulu!");
+                return;
+            }
 
-                addToCart(menuId, qty, $(this));
-            });
+            addToCart(menuId, qty, $(this));
+        });
+    }
+
+    function isUserLoggedIn() {
+        if (typeof window.userAuth !== "undefined") {
+            return window.userAuth === "true" || window.userAuth === true;
+        }
+
+        const authMeta = document.querySelector('meta[name="user-auth"]');
+        if (authMeta) {
+            return authMeta.content === "true";
+        }
+
+        const bodyAuth = document.body.getAttribute("data-auth");
+        if (bodyAuth) {
+            return bodyAuth === "true";
+        }
+
+        return true;
     }
 
     function addToCart(menuId, qty, cartIcon) {
@@ -342,12 +362,7 @@
 
         var originalClass = cartIcon.attr("class");
 
-        cartIcon.html('<i class="bi bi-hourglass-split"></i>');
-        cartIcon.css({
-            color: "#ce1212",
-            transform: "scale(1.1)",
-            animation: "pulse 1s infinite",
-        });
+        cartIcon.removeClass().addClass("bi bi-hourglass-split");
 
         var csrfToken = document.querySelector('meta[name="csrf-token"]');
         var token = csrfToken ? csrfToken.content : "";
@@ -367,16 +382,7 @@
                 if (data.success) {
                     showToast("Berhasil ditambahkan ke keranjang!");
 
-                    var countSpan = cartIcon
-                        .closest(".menu-item")
-                        .find(".quantity-display");
-                    if (countSpan.length) {
-                        countSpan.text("0");
-                    }
-                    cartIcon.css({
-                        color: "",
-                        transform: "",
-                    });
+                    $(`.count[data-menu-id="${menuId}"]`).text("0");
 
                     updateNavbarCart(data);
 
@@ -392,13 +398,773 @@
             },
             error: function (xhr) {
                 console.error("Add to cart error:", xhr);
-                showToast("Terjadi kesalahan!");
+                if (xhr.status === 401 || xhr.status === 403) {
+                    showToast("Silakan login terlebih dahulu!");
+                    setTimeout(() => {
+                        window.location.href = "/login";
+                    }, 1500);
+                } else {
+                    showToast("Terjadi kesalahan!");
+                }
             },
             complete: function () {
                 cartIcon.attr("class", originalClass);
-                cartIcon.css("animation", "");
             },
         });
+    }
+
+    function initializeMenuFunctionality() {
+        if ($("#menu-starters").length > 0 || $("#menu-breakfast").length > 0) {
+            initializeMenuFilters();
+            initializeMenuSearch();
+            initializeQuantitySelectors();
+        }
+    }
+
+    function initializeQuantitySelectors() {
+        $(document).off("click.quantity", ".btn-plus, .btn-minus");
+
+        $(document).on("click.quantity", ".btn-plus", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log("Plus button clicked (CORRECTED)");
+
+            const menuId = $(this).data("menu-id");
+            var quantitySpan = $(`.count[data-menu-id="${menuId}"]`);
+            var currentQty = parseInt(quantitySpan.text()) || 0;
+
+            if (currentQty < 99) {
+                quantitySpan.text(currentQty + 1);
+                console.log("Quantity increased to:", currentQty + 1);
+            }
+        });
+
+        $(document).on("click.quantity", ".btn-minus", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log("Minus button clicked (CORRECTED)");
+
+            const menuId = $(this).data("menu-id");
+            var quantitySpan = $(`.count[data-menu-id="${menuId}"]`);
+            var currentQty = parseInt(quantitySpan.text()) || 0;
+
+            if (currentQty > 0) {
+                quantitySpan.text(currentQty - 1);
+                console.log("Quantity decreased to:", currentQty - 1);
+            }
+        });
+
+        console.log(
+            "Quantity selectors initialized successfully with CORRECT class names"
+        );
+    }
+
+    function initializeMenuFilters() {
+        $(document).off("click.filter", ".filter-item");
+        $(document).on("click.filter", ".filter-item", function () {
+            $(".filter-item").removeClass("active");
+            $(this).addClass("active");
+
+            var kategoriId = $(this).data("kategori");
+            filterMenuItems(kategoriId);
+            $("#searchInput").val("");
+        });
+    }
+
+    function filterMenuItems(kategoriId) {
+        var visibleCount = 0;
+
+        $(".menu-item").each(function () {
+            var itemKategori = $(this).data("kategori");
+
+            if (
+                kategoriId === "" ||
+                kategoriId === undefined ||
+                itemKategori == kategoriId
+            ) {
+                $(this).removeClass("hidden").show();
+                visibleCount++;
+            } else {
+                $(this).addClass("hidden").hide();
+            }
+        });
+
+        toggleEmptyState(visibleCount === 0);
+    }
+
+    function initializeMenuSearch() {
+        var searchTimeout;
+
+        $(document).off("input.search", "#searchInput");
+        $(document).on("input.search", "#searchInput", function () {
+            clearTimeout(searchTimeout);
+            var query = $(this).val().trim().toLowerCase();
+
+            searchTimeout = setTimeout(function () {
+                searchMenuItems(query);
+            }, 300);
+        });
+
+        $(document).off("keypress.search", "#searchInput");
+        $(document).on("keypress.search", "#searchInput", function (e) {
+            if (e.which === 13) {
+                var query = $(this).val().trim().toLowerCase();
+                searchMenuItems(query);
+            }
+        });
+    }
+
+    function searchMenuItems(query) {
+        var visibleCount = 0;
+
+        if (query === "") {
+            $(".menu-item").show();
+            visibleCount = $(".menu-item").length;
+        } else {
+            $(".menu-item").each(function () {
+                var menuName = $(this).find("h4").text().toLowerCase();
+                var ingredients = $(this)
+                    .find(".ingredients")
+                    .text()
+                    .toLowerCase();
+
+                if (menuName.includes(query) || ingredients.includes(query)) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        $(".filter-item").removeClass("active");
+        $(".filter-item[data-kategori='']").addClass("active");
+
+        toggleEmptyState(visibleCount === 0);
+    }
+
+    function toggleEmptyState(show) {
+        if (show) {
+            $("#emptyState").show();
+        } else {
+            $("#emptyState").hide();
+        }
+    }
+
+    $(document).ready(function () {
+        if ($("#menu-breakfast").length > 0) {
+            let selectedBaseMenu = null;
+            let selectedAddons = [];
+            let maxAddons = 5;
+
+            initializeCustomMenu();
+
+            function initializeCustomMenu() {
+                if (
+                    typeof window.baseMenus !== "undefined" &&
+                    typeof window.addons !== "undefined"
+                ) {
+                    renderBaseMenus(window.baseMenus);
+                    renderAddons(window.addons);
+                } else {
+                    loadCustomMenuDataAjax();
+                }
+            }
+
+            function loadCustomMenuDataAjax() {
+                $.ajax({
+                    url: "/api/custom-menu/data",
+                    type: "GET",
+                    success: function (response) {
+                        console.log("AJAX data loaded successfully:", response);
+                        renderBaseMenus(response.baseMenus || []);
+                        renderAddons(response.addons || []);
+                    },
+                    error: function (xhr) {
+                        console.error("Failed to load custom menu data:", xhr);
+                        $("#baseMenuContainer").html(
+                            '<div class="col-12"><p class="text-danger text-center">Gagal memuat data. Refresh halaman.</p></div>'
+                        );
+                        $("#addonsContainer").html(
+                            '<div class="col-12"><p class="text-danger text-center">Gagal memuat data. Refresh halaman.</p></div>'
+                        );
+                    },
+                });
+            }
+
+            function renderBaseMenus(baseMenus) {
+                const container = $("#baseMenuContainer");
+                container.empty();
+
+                console.log("Rendering base menus:", baseMenus);
+
+                if (!baseMenus || baseMenus.length === 0) {
+                    container.html(
+                        '<div class="col-12"><p class="text-muted text-center">Belum ada pancong polos tersedia</p></div>'
+                    );
+                    return;
+                }
+
+                baseMenus.forEach((menu) => {
+                    const menuCard = `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div class="card base-menu-card" data-menu-id="${
+                        menu.id_item
+                    }" style="cursor: pointer;">
+                        <img src="${
+                            menu.gambar
+                                ? "/gambar-menu/" + menu.gambar
+                                : "/assets/img/menu/menu-item-2.png"
+                        }" 
+                             class="card-img-top" alt="${menu.nama_item}">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">${menu.nama_item}</h6>
+                            <p class="card-text text-muted small mb-1">${
+                                menu.category.nama_kategori
+                            }</p>
+                            <p class="card-text fw-bold small mb-0">Rp ${formatNumber(
+                                menu.harga
+                            )}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+                    container.append(menuCard);
+                });
+
+                $(".base-menu-card")
+                    .off("click")
+                    .on("click", function () {
+                        $(".base-menu-card").removeClass(
+                            "border-primary bg-light"
+                        );
+                        $(this).addClass("border-primary bg-light");
+
+                        const menuId = $(this).data("menu-id");
+                        selectedBaseMenu = baseMenus.find(
+                            (menu) => menu.id_item == menuId
+                        );
+
+                        if (selectedBaseMenu) {
+                            selectedBaseMenu.harga =
+                                parseFloat(selectedBaseMenu.harga) || 0;
+                        }
+
+                        console.log("Selected base menu:", selectedBaseMenu);
+                        updateSummary();
+                    });
+            }
+
+            function renderAddons(addons) {
+                const container = $("#addonsContainer");
+                container.empty();
+
+                console.log("Rendering addons:", addons);
+
+                if (!addons || addons.length === 0) {
+                    container.html(
+                        '<div class="col-12"><p class="text-muted text-center">Belum ada add-ons tersedia</p></div>'
+                    );
+                    return;
+                }
+
+                addons.forEach((addon) => {
+                    const addonCard = `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                    <div class="card addon-card" data-addon-id="${addon.id}">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">${addon.nama_addon}</h6>
+                            <p class="card-text fw-bold small mb-2">Rp ${formatNumber(
+                                addon.harga_addon
+                            )}</p>
+                            ${
+                                addon.deskripsi
+                                    ? `<p class="card-text text-muted small mb-2">${addon.deskripsi}</p>`
+                                    : ""
+                            }
+                            <div class="addon-controls">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary addon-minus" type="button">-</button>
+                                    <input type="number" class="form-control text-center addon-qty" value="0" min="0" max="5" readonly>
+                                    <button class="btn btn-outline-secondary addon-plus" type="button">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                    container.append(addonCard);
+                });
+
+                $(".addon-plus")
+                    .off("click")
+                    .on("click", function () {
+                        const card = $(this).closest(".addon-card");
+                        const qtyInput = card.find(".addon-qty");
+                        const currentQty = parseInt(qtyInput.val());
+                        const addonId = card.data("addon-id");
+
+                        if (
+                            selectedAddons.length >= maxAddons &&
+                            currentQty === 0
+                        ) {
+                            showToast(
+                                `Maksimal ${maxAddons} add-ons`,
+                                "warning"
+                            );
+                            return;
+                        }
+
+                        if (currentQty < 5) {
+                            qtyInput.val(currentQty + 1);
+                            updateSelectedAddons(
+                                addonId,
+                                currentQty + 1,
+                                addons
+                            );
+                        }
+                    });
+
+                $(".addon-minus")
+                    .off("click")
+                    .on("click", function () {
+                        const card = $(this).closest(".addon-card");
+                        const qtyInput = card.find(".addon-qty");
+                        const currentQty = parseInt(qtyInput.val());
+                        const addonId = card.data("addon-id");
+
+                        if (currentQty > 0) {
+                            qtyInput.val(currentQty - 1);
+                            updateSelectedAddons(
+                                addonId,
+                                currentQty - 1,
+                                addons
+                            );
+                        }
+                    });
+            }
+
+            function updateSelectedAddons(addonId, qty, addons) {
+                const addon = addons.find((a) => a.id == addonId);
+                const existingIndex = selectedAddons.findIndex(
+                    (a) => a.id == addonId
+                );
+
+                if (qty === 0) {
+                    if (existingIndex > -1) {
+                        selectedAddons.splice(existingIndex, 1);
+                    }
+                } else {
+                    if (existingIndex > -1) {
+                        selectedAddons[existingIndex].qty = qty;
+                    } else {
+                        selectedAddons.push({
+                            id: addon.id,
+                            nama_addon: addon.nama_addon,
+                            harga_addon: parseFloat(addon.harga_addon) || 0,
+                            qty: qty,
+                        });
+                    }
+                }
+
+                $("#selectedAddonsCount").text(selectedAddons.length);
+                updateSummary();
+            }
+
+            function updateSummary() {
+                const summaryContent = $("#summaryContent");
+
+                if (!selectedBaseMenu) {
+                    summaryContent.html(
+                        '<p class="text-muted">Pilih base menu terlebih dahulu</p>'
+                    );
+                    $("#totalPrice").text("Rp 0");
+                    $("#addToCartBtn").prop("disabled", true);
+                    return;
+                }
+
+                const basePrice = parseFloat(selectedBaseMenu.harga) || 0;
+
+                let html = `<p><strong>Base:</strong> ${
+                    selectedBaseMenu.nama_item
+                } - Rp ${formatNumber(basePrice)}</p>`;
+
+                let addonsPrice = 0;
+                if (selectedAddons.length > 0) {
+                    html +=
+                        '<p><strong>Add-ons:</strong></p><ul class="list-unstyled ms-3">';
+                    selectedAddons.forEach((addon) => {
+                        const addonPrice = parseFloat(addon.harga_addon) || 0;
+                        const addonQty = parseInt(addon.qty) || 0;
+                        const subtotal = addonPrice * addonQty;
+                        addonsPrice += subtotal;
+                        html += `<li>• ${
+                            addon.nama_addon
+                        } (${addonQty}x) - Rp ${formatNumber(subtotal)}</li>`;
+                    });
+                    html += "</ul>";
+                }
+
+                const qty = parseInt($("#customQty").val()) || 1;
+
+                const totalPerItem = basePrice + addonsPrice;
+                const grandTotal = totalPerItem * qty;
+
+                console.log("Calculation debug:", {
+                    basePrice: basePrice,
+                    addonsPrice: addonsPrice,
+                    totalPerItem: totalPerItem,
+                    qty: qty,
+                    grandTotal: grandTotal,
+                });
+
+                summaryContent.html(html);
+                $("#totalPrice").text("Rp " + formatNumber(grandTotal));
+                $("#addToCartBtn").prop("disabled", false);
+            }
+
+            $("#qtyMinus")
+                .off("click")
+                .on("click", function () {
+                    const qtyInput = $("#customQty");
+                    const currentQty = parseInt(qtyInput.val());
+                    if (currentQty > 1) {
+                        qtyInput.val(currentQty - 1);
+                        updateSummary();
+                    }
+                });
+
+            $("#qtyPlus")
+                .off("click")
+                .on("click", function () {
+                    const qtyInput = $("#customQty");
+                    const currentQty = parseInt(qtyInput.val());
+                    if (currentQty < 99) {
+                        qtyInput.val(currentQty + 1);
+                        updateSummary();
+                    }
+                });
+
+            $("#customQty").on("input", function () {
+                updateSummary();
+            });
+
+            $("#customMenuForm")
+                .off("submit")
+                .on("submit", function (e) {
+                    e.preventDefault();
+
+                    if (!selectedBaseMenu) {
+                        showToast("Pilih base menu terlebih dahulu", "warning");
+                        return;
+                    }
+
+                    if (!window.userAuth || window.userAuth === "false") {
+                        window.location.href = window.loginUrl;
+                        return;
+                    }
+
+                    const formData = {
+                        base_menu_id: selectedBaseMenu.id_item,
+                        selected_addons: selectedAddons,
+                        qty: parseInt($("#customQty").val()),
+                    };
+
+                    $.ajax({
+                        url: "/custom-menu/add-to-cart",
+                        type: "POST",
+                        data: formData,
+                        headers: {
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                                "content"
+                            ),
+                        },
+                        success: function (response) {
+                            console.log("Add to cart success:", response);
+                            showToast(response.message, "success");
+                            resetCustomForm();
+
+                            if (typeof updateCartBadge === "function") {
+                                updateCartBadge();
+                            } else {
+                                console.log(
+                                    "updateCartBadge not available, reloading..."
+                                );
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error("Add to cart error:", xhr);
+                            const response = xhr.responseJSON;
+                            showToast(
+                                response?.message || "Terjadi kesalahan",
+                                "error"
+                            );
+                        },
+                    });
+                });
+
+            function resetCustomForm() {
+                selectedBaseMenu = null;
+                selectedAddons = [];
+                $(".base-menu-card").removeClass("border-primary bg-light");
+                $(".addon-qty").val(0);
+                $("#customQty").val(1);
+                $("#selectedAddonsCount").text("0");
+                updateSummary();
+            }
+
+            function formatNumber(num) {
+                return new Intl.NumberFormat("id-ID", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }).format(num);
+            }
+
+            function showToast(message, type = "success") {
+                $("#toastMessage").text(message);
+                const toast = new bootstrap.Toast($("#cartToast")[0]);
+                toast.show();
+            }
+        }
+    });
+
+    function initializeCartPageFunctionality() {
+        if ($(".cart-item").length > 0 || $("#cartSubtotal").length > 0) {
+            console.log(
+                "Cart page detected - Initializing cart page functionality"
+            );
+
+            $(document).off("click.cartpage", ".qty-btn");
+            $(document).on("click.cartpage", ".qty-btn", function (e) {
+                e.preventDefault();
+
+                var itemId = $(this).data("item");
+                var action = $(this).data("action");
+                var itemType = $(this).data("type");
+                var qtyInput = $(`.qty-input[data-item="${itemId}"]`);
+                var currentQty = parseInt(qtyInput.val()) || 0;
+                var newQty = currentQty;
+
+                if (action === "increase" && currentQty < 99) {
+                    newQty = currentQty + 1;
+                } else if (action === "decrease" && currentQty > 0) {
+                    newQty = currentQty - 1;
+                }
+
+                if (newQty !== currentQty) {
+                    console.log(
+                        "Updating cart item:",
+                        itemId,
+                        "to qty:",
+                        newQty
+                    );
+                    updateCartItem(itemId, newQty, itemType);
+                }
+            });
+
+            $(document).off("change.cartpage", ".qty-input");
+            $(document).on("change.cartpage", ".qty-input", function () {
+                var itemId = $(this).data("item");
+                var itemType = $(this).data("type");
+                var newQty = parseInt($(this).val()) || 0;
+
+                if (newQty < 0) newQty = 0;
+                if (newQty > 99) newQty = 99;
+
+                $(this).val(newQty);
+                updateCartItem(itemId, newQty, itemType);
+            });
+
+            $(document).off("click.cartpage", ".remove-item");
+            $(document).on("click.cartpage", ".remove-item", function (e) {
+                e.preventDefault();
+
+                var itemId = $(this).data("item");
+                var itemType = $(this).data("type");
+                var itemName = $(this).closest(".cart-item").find("h6").text();
+
+                if (confirm(`Hapus ${itemName} dari keranjang?`)) {
+                    removeCartItem(itemId, itemType);
+                }
+            });
+
+            $(document).off("click.cartpage", "#clearCartBtn");
+            $(document).on("click.cartpage", "#clearCartBtn", function (e) {
+                e.preventDefault();
+
+                if (confirm("Yakin ingin mengosongkan keranjang?")) {
+                    clearCart();
+                }
+            });
+        }
+    }
+
+    function updateCartItem(itemId, qty, itemType = "regular") {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        var cartItem = $(`.cart-item[data-item="${itemId}"]`);
+
+        cartItem.addClass("loading");
+
+        var url =
+            itemType === "custom" ? "/custom-menu/update-cart" : "/cart/update";
+        var data =
+            itemType === "custom"
+                ? { item_id: itemId, qty: qty }
+                : { menu_id: itemId, qty: qty };
+
+        $.ajax({
+            url: url,
+            method: "PUT",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    if (qty === 0) {
+                        cartItem.fadeOut(300, function () {
+                            $(this).remove();
+                            checkEmptyCart();
+                        });
+                    } else {
+                        $(`.qty-input[data-item="${itemId}"]`).val(qty);
+                        var price = parseFloat(
+                            cartItem
+                                .find(".fw-bold")
+                                .first()
+                                .text()
+                                .replace(/[^\d]/g, "")
+                        );
+                        var subtotal = price * qty;
+                        cartItem
+                            .find(".fw-bold")
+                            .last()
+                            .text("Rp " + formatRupiah(subtotal));
+                    }
+
+                    updateCartTotals(response);
+                    showCartToast(response.message);
+                    updateCartBadge();
+                } else {
+                    showCartToast(response.message, "error");
+                }
+            },
+            error: function (xhr) {
+                var message =
+                    xhr.responseJSON?.message || "Gagal mengupdate keranjang";
+                showCartToast(message, "error");
+            },
+            complete: function () {
+                cartItem.removeClass("loading");
+            },
+        });
+    }
+
+    function removeCartItem(itemId, itemType = "regular") {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        var cartItem = $(`.cart-item[data-item="${itemId}"]`);
+
+        cartItem.addClass("loading");
+
+        var url =
+            itemType === "custom" ? "/custom-menu/update-cart" : "/cart/remove";
+        var method = itemType === "custom" ? "PUT" : "DELETE";
+        var data =
+            itemType === "custom"
+                ? { item_id: itemId, qty: 0 }
+                : { menu_id: itemId };
+
+        $.ajax({
+            url: url,
+            method: method,
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    cartItem.fadeOut(300, function () {
+                        $(this).remove();
+                        checkEmptyCart();
+                    });
+
+                    updateCartTotals(response);
+                    showCartToast(response.message);
+                    updateCartBadge();
+                } else {
+                    showCartToast(response.message, "error");
+                }
+            },
+            error: function (xhr) {
+                var message =
+                    xhr.responseJSON?.message || "Gagal menghapus item";
+                showCartToast(message, "error");
+            },
+            complete: function () {
+                cartItem.removeClass("loading");
+            },
+        });
+    }
+
+    function clearCart() {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        $("#clearCartBtn")
+            .prop("disabled", true)
+            .html('<i class="bi bi-arrow-repeat"></i> Mengosongkan...');
+
+        $.ajax({
+            url: "/cart/clear",
+            method: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            success: function (response) {
+                if (response.success) {
+                    showCartToast(response.message);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showCartToast(response.message, "error");
+                }
+            },
+            error: function (xhr) {
+                var message =
+                    xhr.responseJSON?.message || "Gagal mengosongkan keranjang";
+                showCartToast(message, "error");
+            },
+            complete: function () {
+                $("#clearCartBtn")
+                    .prop("disabled", false)
+                    .html('<i class="bi bi-trash"></i> Kosongkan Keranjang');
+            },
+        });
+    }
+
+    function updateCartTotals(response) {
+        if (response.cart_total !== undefined) {
+            $("#cartSubtotal").text("Rp " + formatRupiah(response.cart_total));
+            $("#cartTotal").text("Rp " + formatRupiah(response.cart_total));
+        }
+
+        if (response.cart_count !== undefined) {
+            $("#cartItemCount").text(response.cart_count);
+            $(".cart-badge").text(response.cart_count);
+        }
+    }
+
+    function checkEmptyCart() {
+        if ($(".cart-item").length === 0) {
+            setTimeout(function () {
+                window.location.reload();
+            }, 500);
+        }
     }
 
     function updateCartBadge() {
@@ -607,698 +1373,12 @@
             });
     }
 
-    function initializeCartPageFunctionality() {
-        if ($(".cart-item").length > 0 || $("#cartSubtotal").length > 0) {
-            console.log(
-                "Cart page detected - Initializing cart page functionality"
-            );
-
-            $(document)
-                .off("click", ".qty-btn")
-                .on("click", ".qty-btn", function (e) {
-                    e.preventDefault();
-
-                    var itemId = $(this).data("item");
-                    var action = $(this).data("action");
-                    var itemType = $(this).data("type");
-                    var qtyInput = $(`.qty-input[data-item="${itemId}"]`);
-                    var currentQty = parseInt(qtyInput.val()) || 0;
-                    var newQty = currentQty;
-
-                    if (action === "increase" && currentQty < 99) {
-                        newQty = currentQty + 1;
-                    } else if (action === "decrease" && currentQty > 0) {
-                        newQty = currentQty - 1;
-                    }
-
-                    if (newQty !== currentQty) {
-                        console.log(
-                            "Updating cart item:",
-                            itemId,
-                            "to qty:",
-                            newQty
-                        );
-                        updateCartItem(itemId, newQty, itemType);
-                    }
-                });
-
-            $(document)
-                .off("change", ".qty-input")
-                .on("change", ".qty-input", function () {
-                    var itemId = $(this).data("item");
-                    var itemType = $(this).data("type");
-                    var newQty = parseInt($(this).val()) || 0;
-
-                    if (newQty < 0) newQty = 0;
-                    if (newQty > 99) newQty = 99;
-
-                    $(this).val(newQty);
-                    updateCartItem(itemId, newQty, itemType);
-                });
-
-            $(document)
-                .off("click", ".remove-item")
-                .on("click", ".remove-item", function (e) {
-                    e.preventDefault();
-
-                    var itemId = $(this).data("item");
-                    var itemType = $(this).data("type");
-                    var itemName = $(this)
-                        .closest(".cart-item")
-                        .find("h6")
-                        .text();
-
-                    if (confirm(`Hapus ${itemName} dari keranjang?`)) {
-                        removeCartItem(itemId, itemType);
-                    }
-                });
-
-            $(document)
-                .off("click", "#clearCartBtn")
-                .on("click", "#clearCartBtn", function (e) {
-                    e.preventDefault();
-
-                    if (confirm("Yakin ingin mengosongkan keranjang?")) {
-                        clearCart();
-                    }
-                });
-        }
-    }
-
-    function updateCartItem(itemId, qty, itemType = "regular") {
-        var csrfToken = $('meta[name="csrf-token"]').attr("content");
-        var cartItem = $(`.cart-item[data-item="${itemId}"]`);
-
-        cartItem.addClass("loading");
-
-        var url =
-            itemType === "custom" ? "/custom-menu/update-cart" : "/cart/update";
-        var data =
-            itemType === "custom"
-                ? { item_id: itemId, qty: qty }
-                : { menu_id: itemId, qty: qty };
-
-        $.ajax({
-            url: url,
-            method: "PUT",
-            headers: {
-                "X-CSRF-TOKEN": csrfToken,
-            },
-            data: data,
-            success: function (response) {
-                if (response.success) {
-                    if (qty === 0) {
-                        cartItem.fadeOut(300, function () {
-                            $(this).remove();
-                            checkEmptyCart();
-                        });
-                    } else {
-                        $(`.qty-input[data-item="${itemId}"]`).val(qty);
-                        var price = parseFloat(
-                            cartItem
-                                .find(".fw-bold")
-                                .first()
-                                .text()
-                                .replace(/[^\d]/g, "")
-                        );
-                        var subtotal = price * qty;
-                        cartItem
-                            .find(".fw-bold")
-                            .last()
-                            .text("Rp " + formatRupiah(subtotal));
-                    }
-
-                    updateCartTotals(response);
-                    showCartToast(response.message);
-                    updateCartBadge();
-                } else {
-                    showCartToast(response.message, "error");
-                }
-            },
-            error: function (xhr) {
-                var message =
-                    xhr.responseJSON?.message || "Gagal mengupdate keranjang";
-                showCartToast(message, "error");
-            },
-            complete: function () {
-                cartItem.removeClass("loading");
-            },
-        });
-    }
-
-    function removeCartItem(itemId, itemType = "regular") {
-        var csrfToken = $('meta[name="csrf-token"]').attr("content");
-        var cartItem = $(`.cart-item[data-item="${itemId}"]`);
-
-        cartItem.addClass("loading");
-
-        var url =
-            itemType === "custom" ? "/custom-menu/update-cart" : "/cart/remove";
-        var method = itemType === "custom" ? "PUT" : "DELETE";
-        var data =
-            itemType === "custom"
-                ? { item_id: itemId, qty: 0 }
-                : { menu_id: itemId };
-
-        $.ajax({
-            url: url,
-            method: method,
-            headers: {
-                "X-CSRF-TOKEN": csrfToken,
-            },
-            data: data,
-            success: function (response) {
-                if (response.success) {
-                    cartItem.fadeOut(300, function () {
-                        $(this).remove();
-                        checkEmptyCart();
-                    });
-
-                    updateCartTotals(response);
-                    showCartToast(response.message);
-                    updateCartBadge();
-                } else {
-                    showCartToast(response.message, "error");
-                }
-            },
-            error: function (xhr) {
-                var message =
-                    xhr.responseJSON?.message || "Gagal menghapus item";
-                showCartToast(message, "error");
-            },
-            complete: function () {
-                cartItem.removeClass("loading");
-            },
-        });
-    }
-
-    function clearCart() {
-        var csrfToken = $('meta[name="csrf-token"]').attr("content");
-
-        $("#clearCartBtn")
-            .prop("disabled", true)
-            .html('<i class="bi bi-arrow-repeat"></i> Mengosongkan...');
-
-        $.ajax({
-            url: "/cart/clear",
-            method: "DELETE",
-            headers: {
-                "X-CSRF-TOKEN": csrfToken,
-            },
-            success: function (response) {
-                if (response.success) {
-                    showCartToast(response.message);
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    showCartToast(response.message, "error");
-                }
-            },
-            error: function (xhr) {
-                var message =
-                    xhr.responseJSON?.message || "Gagal mengosongkan keranjang";
-                showCartToast(message, "error");
-            },
-            complete: function () {
-                $("#clearCartBtn")
-                    .prop("disabled", false)
-                    .html('<i class="bi bi-trash"></i> Kosongkan Keranjang');
-            },
-        });
-    }
-
-    function updateCartTotals(response) {
-        if (response.cart_total !== undefined) {
-            $("#cartSubtotal").text("Rp " + formatRupiah(response.cart_total));
-            $("#cartTotal").text("Rp " + formatRupiah(response.cart_total));
-        }
-
-        if (response.cart_count !== undefined) {
-            $("#cartItemCount").text(response.cart_count);
-            $(".cart-badge").text(response.cart_count);
-        }
-    }
-
-    function checkEmptyCart() {
-        if ($(".cart-item").length === 0) {
-            setTimeout(function () {
-                window.location.reload();
-            }, 500);
-        }
-    }
-
-    function initializeMenuFunctionality() {
-        if ($("#menu-starters").length > 0 || $("#menu-breakfast").length > 0) {
-            initializeMenuFilters();
-            initializeMenuSearch();
-            initializeQuantitySelectors();
-        }
-    }
-
-    function initializeMenuFilters() {
-        $(document)
-            .off("click", ".filter-item")
-            .on("click", ".filter-item", function () {
-                $(".filter-item").removeClass("active");
-                $(this).addClass("active");
-
-                var kategoriId = $(this).data("kategori");
-                filterMenuItems(kategoriId);
-                $("#searchInput").val("");
-            });
-    }
-
-    function filterMenuItems(kategoriId) {
-        var visibleCount = 0;
-
-        $(".menu-item").each(function () {
-            var itemKategori = $(this).data("kategori");
-
-            if (
-                kategoriId === "" ||
-                kategoriId === undefined ||
-                itemKategori == kategoriId
-            ) {
-                $(this).removeClass("hidden").show();
-                visibleCount++;
-            } else {
-                $(this).addClass("hidden").hide();
-            }
-        });
-
-        toggleEmptyState(visibleCount === 0);
-    }
-
-    function initializeMenuSearch() {
-        var searchTimeout;
-
-        $(document)
-            .off("input", "#searchInput")
-            .on("input", "#searchInput", function () {
-                clearTimeout(searchTimeout);
-                var query = $(this).val().trim().toLowerCase();
-
-                searchTimeout = setTimeout(function () {
-                    searchMenuItems(query);
-                }, 300);
-            });
-
-        $(document)
-            .off("keypress", "#searchInput")
-            .on("keypress", "#searchInput", function (e) {
-                if (e.which === 13) {
-                    var query = $(this).val().trim().toLowerCase();
-                    searchMenuItems(query);
-                }
-            });
-    }
-
-    function searchMenuItems(query) {
-        var visibleCount = 0;
-
-        if (query === "") {
-            $(".menu-item").show();
-            visibleCount = $(".menu-item").length;
-        } else {
-            $(".menu-item").each(function () {
-                var menuName = $(this).find("h4").text().toLowerCase();
-                var ingredients = $(this)
-                    .find(".ingredients")
-                    .text()
-                    .toLowerCase();
-
-                if (menuName.includes(query) || ingredients.includes(query)) {
-                    $(this).show();
-                    visibleCount++;
-                } else {
-                    $(this).hide();
-                }
-            });
-        }
-
-        $(".filter-item").removeClass("active");
-        $(".filter-item[data-kategori='']").addClass("active");
-
-        toggleEmptyState(visibleCount === 0);
-    }
-
-    function initializeQuantitySelectors() {
-        $(document)
-            .off("click", ".plus-btn")
-            .on("click", ".plus-btn", function () {
-                var quantitySpan = $(this).siblings(".quantity-display");
-                var currentQty = parseInt(quantitySpan.text());
-                if (currentQty < 99) {
-                    quantitySpan.text(currentQty + 1);
-                    updateCartButtonState($(this).closest(".menu-item"));
-                }
-            });
-
-        $(document)
-            .off("click", ".minus-btn")
-            .on("click", ".minus-btn", function () {
-                var quantitySpan = $(this).siblings(".quantity-display");
-                var currentQty = parseInt(quantitySpan.text());
-                if (currentQty > 0) {
-                    quantitySpan.text(currentQty - 1);
-                    updateCartButtonState($(this).closest(".menu-item"));
-                }
-            });
-    }
-
-    function updateCartButtonState(menuItem) {
-        var qty = parseInt(menuItem.find(".quantity-display").text());
-        var cartBtn = menuItem.find(".add-to-cart-btn");
-
-        if (qty > 0) {
-            cartBtn.removeClass("btn-outline-danger").addClass("btn-danger");
-            cartBtn.find("i").css("color", "#fff");
-        } else {
-            cartBtn.removeClass("btn-danger").addClass("btn-outline-danger");
-            cartBtn.find("i").css("color", "");
-        }
-    }
-
-    function toggleEmptyState(show) {
-        if (show) {
-            $("#emptyState").show();
-        } else {
-            $("#emptyState").hide();
-        }
-    }
-
-    function initializeCustomMenuFunctionality() {
-        if ($("#menu-breakfast").length > 0) {
-            let selectedBaseMenu = null;
-            let selectedAddons = [];
-            let maxAddons = 5;
-
-            initializeCustomMenu();
-
-            function initializeCustomMenu() {
-                if (
-                    typeof window.baseMenus !== "undefined" &&
-                    typeof window.addons !== "undefined"
-                ) {
-                    renderBaseMenus(window.baseMenus);
-                    renderAddons(window.addons);
-                }
-            }
-
-            function renderBaseMenus(baseMenus) {
-                const container = $("#baseMenuContainer");
-                container.empty();
-
-                if (!baseMenus || baseMenus.length === 0) {
-                    container.html(
-                        '<div class="col-12"><p class="text-muted text-center">Belum ada pancong polos tersedia</p></div>'
-                    );
-                    return;
-                }
-
-                baseMenus.forEach((menu) => {
-                    const menuCard = `
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                        <div class="card base-menu-card" data-menu-id="${
-                            menu.id_item
-                        }" style="cursor: pointer;">
-                            <img src="${
-                                menu.gambar
-                                    ? "/gambar-menu/" + menu.gambar
-                                    : "/admin/img/nophoto.jpg"
-                            }" 
-                                 class="card-img-top" alt="${
-                                     menu.nama_item
-                                 }" style="height: 200px; object-fit: cover;">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">${menu.nama_item}</h5>
-                                <p class="card-text text-muted">Rp ${formatRupiah(
-                                    menu.harga
-                                )}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                    container.append(menuCard);
-                });
-
-                $(".base-menu-card")
-                    .off("click")
-                    .on("click", function () {
-                        $(".base-menu-card").removeClass("selected");
-                        $(this).addClass("selected");
-
-                        const menuId = $(this).data("menu-id");
-                        selectedBaseMenu = baseMenus.find(
-                            (menu) => menu.id_item == menuId
-                        );
-
-                        updateCustomMenuPreview();
-                        calculateCustomPrice();
-                    });
-            }
-
-            function renderAddons(addons) {
-                const container = $("#addonsContainer");
-                container.empty();
-
-                if (!addons || addons.length === 0) {
-                    container.html(
-                        '<div class="col-12"><p class="text-muted text-center">Belum ada addon tersedia</p></div>'
-                    );
-                    return;
-                }
-
-                addons.forEach((addon) => {
-                    const addonCard = `
-                    <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                        <div class="card addon-card" data-addon-id="${
-                            addon.id
-                        }" style="cursor: pointer;">
-                            <div class="card-body text-center">
-                                <h6 class="card-title">${addon.nama_addon}</h6>
-                                <p class="card-text text-muted">+Rp ${formatRupiah(
-                                    addon.harga_addon
-                                )}</p>
-                                <div class="addon-quantity" style="display: none;">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary minus-addon">-</button>
-                                    <span class="addon-qty">1</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary plus-addon">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                    container.append(addonCard);
-                });
-
-                $(".addon-card")
-                    .off("click")
-                    .on("click", function () {
-                        const addonId = $(this).data("addon-id");
-                        const addon = addons.find((a) => a.id == addonId);
-
-                        if ($(this).hasClass("selected")) {
-                            $(this).removeClass("selected");
-                            $(this).find(".addon-quantity").hide();
-                            selectedAddons = selectedAddons.filter(
-                                (a) => a.id != addonId
-                            );
-                        } else {
-                            if (selectedAddons.length < maxAddons) {
-                                $(this).addClass("selected");
-                                $(this).find(".addon-quantity").show();
-                                selectedAddons.push({
-                                    id: addon.id,
-                                    nama_addon: addon.nama_addon,
-                                    harga_addon: addon.harga_addon,
-                                    qty: 1,
-                                });
-                            } else {
-                                showToast(
-                                    `Maksimal ${maxAddons} addon yang bisa dipilih`
-                                );
-                            }
-                        }
-
-                        updateCustomMenuPreview();
-                        calculateCustomPrice();
-                    });
-
-                $(document)
-                    .off("click", ".plus-addon")
-                    .on("click", ".plus-addon", function (e) {
-                        e.stopPropagation();
-                        const card = $(this).closest(".addon-card");
-                        const addonId = card.data("addon-id");
-                        const qtySpan = $(this).siblings(".addon-qty");
-                        const currentQty = parseInt(qtySpan.text());
-
-                        if (currentQty < 5) {
-                            qtySpan.text(currentQty + 1);
-
-                            const addon = selectedAddons.find(
-                                (a) => a.id == addonId
-                            );
-                            if (addon) {
-                                addon.qty = currentQty + 1;
-                                updateCustomMenuPreview();
-                                calculateCustomPrice();
-                            }
-                        }
-                    });
-
-                $(document)
-                    .off("click", ".minus-addon")
-                    .on("click", ".minus-addon", function (e) {
-                        e.stopPropagation();
-                        const card = $(this).closest(".addon-card");
-                        const addonId = card.data("addon-id");
-                        const qtySpan = $(this).siblings(".addon-qty");
-                        const currentQty = parseInt(qtySpan.text());
-
-                        if (currentQty > 1) {
-                            qtySpan.text(currentQty - 1);
-
-                            const addon = selectedAddons.find(
-                                (a) => a.id == addonId
-                            );
-                            if (addon) {
-                                addon.qty = currentQty - 1;
-                                updateCustomMenuPreview();
-                                calculateCustomPrice();
-                            }
-                        }
-                    });
-            }
-
-            function updateCustomMenuPreview() {
-                const preview = $("#customMenuPreview");
-
-                if (!selectedBaseMenu) {
-                    preview.html(
-                        '<p class="text-muted">Pilih pancong polos terlebih dahulu</p>'
-                    );
-                    return;
-                }
-
-                let previewHtml = `
-                <div class="selected-base">
-                    <h6>Base: ${selectedBaseMenu.nama_item}</h6>
-                    <small>Rp ${formatRupiah(selectedBaseMenu.harga)}</small>
-                </div>
-            `;
-
-                if (selectedAddons.length > 0) {
-                    previewHtml +=
-                        '<div class="selected-addons mt-2"><h6>Addons:</h6>';
-                    selectedAddons.forEach((addon) => {
-                        previewHtml += `
-                        <div class="addon-item">
-                            ${addon.nama_addon} (${
-                            addon.qty
-                        }x) - Rp ${formatRupiah(addon.harga_addon * addon.qty)}
-                        </div>
-                    `;
-                    });
-                    previewHtml += "</div>";
-                }
-
-                preview.html(previewHtml);
-            }
-
-            function calculateCustomPrice() {
-                if (!selectedBaseMenu) return;
-
-                let totalPrice = parseFloat(selectedBaseMenu.harga);
-                let addonsPrice = 0;
-
-                selectedAddons.forEach((addon) => {
-                    addonsPrice += addon.harga_addon * addon.qty;
-                });
-
-                totalPrice += addonsPrice;
-
-                $("#customTotalPrice").text("Rp " + formatRupiah(totalPrice));
-                $("#addCustomToCartBtn").prop("disabled", false);
-            }
-
-            $(document)
-                .off("click", "#addCustomToCartBtn")
-                .on("click", "#addCustomToCartBtn", function () {
-                    if (!selectedBaseMenu) {
-                        showToast("Pilih pancong polos terlebih dahulu!");
-                        return;
-                    }
-
-                    const qty = parseInt($("#customQty").val()) || 1;
-
-                    $.ajax({
-                        url: "/custom-menu/add-to-cart",
-                        method: "POST",
-                        headers: {
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                                "content"
-                            ),
-                        },
-                        data: {
-                            base_menu_id: selectedBaseMenu.id_item,
-                            selected_addons: selectedAddons,
-                            qty: qty,
-                        },
-                        success: function (response) {
-                            if (response.success) {
-                                showToast(
-                                    "Custom pancong berhasil ditambahkan ke keranjang!"
-                                );
-
-                                selectedBaseMenu = null;
-                                selectedAddons = [];
-                                $(".base-menu-card, .addon-card").removeClass(
-                                    "selected"
-                                );
-                                $(".addon-quantity").hide();
-                                $(".addon-qty").text("1");
-                                $("#customQty").val(1);
-                                $("#customMenuPreview").html(
-                                    '<p class="text-muted">Pilih pancong polos terlebih dahulu</p>'
-                                );
-                                $("#customTotalPrice").text("Rp 0");
-                                $("#addCustomToCartBtn").prop("disabled", true);
-
-                                updateNavbarCart(response);
-
-                                $(".cart-badge, .mobile-cart-badge").addClass(
-                                    "updated"
-                                );
-                                setTimeout(function () {
-                                    $(
-                                        ".cart-badge, .mobile-cart-badge"
-                                    ).removeClass("updated");
-                                }, 600);
-                            } else {
-                                showToast(
-                                    response.message ||
-                                        "Gagal menambahkan ke keranjang"
-                                );
-                            }
-                        },
-                        error: function () {
-                            showToast("Terjadi kesalahan!");
-                        },
-                    });
-                });
-        }
-    }
-
     function initializeNavbarCartFunctionality() {
-        $(document)
-            .off("click", ".cart-btn")
-            .on("click", ".cart-btn", function (e) {
-                e.preventDefault();
-                $(".cart-dropdown").toggleClass("show");
-            });
+        $(document).off("click.navbar", ".cart-btn");
+        $(document).on("click.navbar", ".cart-btn", function (e) {
+            e.preventDefault();
+            $(".cart-dropdown").toggleClass("show");
+        });
 
         $(document).on("click", function (e) {
             if (!$(e.target).closest(".header-cart").length) {
@@ -1311,20 +1391,58 @@
         });
     }
 
+    function initializeCheckoutFunctionality() {
+        console.log("Checkout functionality initialized");
+    }
+
+    function initializeOrderTracking() {
+        console.log("Order tracking initialized");
+    }
+
+    function initializeMyOrdersFunctionality() {
+        console.log("My orders functionality initialized");
+    }
+
     function formatRupiah(angka) {
         return parseInt(angka).toLocaleString("id-ID");
     }
 
     function showToast(message) {
-        var toast = $('<div class="toast-notification">' + message + "</div>");
+        $(".toast-notification").remove();
+
+        var toast = $(`
+            <div class="toast-notification" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #333;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            ">
+                ${message}
+            </div>
+        `);
+
         $("body").append(toast);
 
         setTimeout(function () {
-            toast.addClass("show");
+            toast.css({
+                opacity: 1,
+                transform: "translateX(0)",
+            });
         }, 100);
 
         setTimeout(function () {
-            toast.removeClass("show");
+            toast.css({
+                opacity: 0,
+                transform: "translateX(100%)",
+            });
+
             setTimeout(function () {
                 toast.remove();
             }, 300);

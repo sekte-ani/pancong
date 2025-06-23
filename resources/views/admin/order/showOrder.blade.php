@@ -1,4 +1,4 @@
-@extends('admin.layouts.index', ['title' => 'Order', 'page_heading' => 'Detail Pesanan'])
+@extends('admin.layouts.index', ['title' => 'Detail Pesanan', 'page_heading' => 'Detail Pesanan #'.$order->id_pesanan])
 
 @section('content')
 <section class="row">
@@ -45,6 +45,12 @@
                                 </span>
                             </td>
                         </tr>
+                        @if($order->catatan)
+                        <tr>
+                            <td><strong>Catatan:</strong></td>
+                            <td>{{ $order->catatan }}</td>
+                        </tr>
+                        @endif
                     </table>
                 </div>
                 <div class="col-md-6">
@@ -62,89 +68,78 @@
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Update Status</button>
+                        <a href="{{ route('admin.order') }}" class="btn btn-secondary">Kembali</a>
                     </form>
                 </div>
             </div>
 
-            @if($order->catatan)
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h5>Catatan Pesanan:</h5>
-                    <p class="bg-light p-3 rounded">{{ $order->catatan }}</p>
-                </div>
-            </div>
-            @endif
-
-            <div class="row">
-                <div class="col-12">
-                    <h4>Detail Pesanan</h4>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Harga Satuan</th>
-                                <th>Qty</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($order->orderItems as $item)
+            <!-- Order Items -->
+            <h4>Detail Items</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Harga</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Regular Menu Items -->
+                        @foreach($order->orderItems as $item)
                             <tr>
                                 <td>
-                                    <strong>{{ $item->menu->nama_item }}</strong>
-                                    <small class="text-muted d-block">Menu Regular</small>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                                             alt="{{ $item->menu->nama_item }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                        <div>
+                                            <h6 class="mb-0">{{ $item->menu->nama_item }}</h6>
+                                            <small class="text-muted">Menu Regular</small>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                 <td>{{ $item->qty }}</td>
                                 <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
                             </tr>
-                            @endforeach
+                        @endforeach
 
-                            @foreach($order->customOrderItems as $customItem)
+                        <!-- Custom Menu Items -->
+                        @foreach($order->customOrderItems as $item)
                             <tr>
                                 <td>
-                                    <strong>{{ $customItem->display_name }}</strong>
-                                    <small class="text-muted d-block">Custom Menu</small>
-                                    <div class="mt-1">
-                                        <small class="text-info">Base: {{ $customItem->baseMenu->nama_item }}</small>
-                                        @if($customItem->selected_addons_details->isNotEmpty())
-                                            <div class="mt-1">
-                                                <small class="text-success">Add-ons:</small>
-                                                @foreach($customItem->selected_addons_details as $addon)
-                                                    <span class="badge bg-light text-dark me-1">
-                                                        {{ $addon['nama_addon'] }} ({{ $addon['qty'] }}x)
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                                             alt="Custom Pancong" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                        <div>
+                                            <h6 class="mb-0">{{ $item->display_name }}</h6>
+                                            <small class="text-muted">Pancong Custom</small>
+                                            @if($item->selected_addons_details->count() > 0)
+                                                <br><small class="text-info">
+                                                    Base: {{ $item->baseMenu->nama_item }}<br>
+                                                    Addons: 
+                                                    @foreach($item->selected_addons_details as $addon)
+                                                        {{ $addon['nama_addon'] }}{{ $addon['qty'] > 1 ? ' ('. $addon['qty'] .'x)' : '' }}{{ !$loop->last ? ', ' : '' }}
+                                                    @endforeach
+                                                </small>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <div>Rp {{ number_format($customItem->base_price + $customItem->addons_price, 0, ',', '.') }}</div>
-                                    <small class="text-muted">
-                                        Base: Rp {{ number_format($customItem->base_price, 0, ',', '.') }}<br>
-                                        Add-ons: Rp {{ number_format($customItem->addons_price, 0, ',', '.') }}
-                                    </small>
-                                </td>
-                                <td>{{ $customItem->qty }}</td>
-                                <td>Rp {{ number_format($customItem->total_price, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format(($item->base_price + $item->addons_price), 0, ',', '.') }}</td>
+                                <td>{{ $item->qty }}</td>
+                                <td>Rp {{ number_format($item->total_price, 0, ',', '.') }}</td>
                             </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr class="table-primary">
-                                <th colspan="3">Total Pesanan</th>
-                                <th>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+                        @endforeach
 
-            <div class="mt-4">
-                <a href="{{ route('admin.order') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Pesanan
-                </a>
+                        <!-- Total -->
+                        <tr class="table-warning">
+                            <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
+                            <td><strong>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

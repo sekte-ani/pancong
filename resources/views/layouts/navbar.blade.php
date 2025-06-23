@@ -57,6 +57,21 @@
           <li><a href="{{ route('menu') }}" class="{{ Route::currentRouteName() == 'menu' ? 'active' : '' }}">MENU</a></li>
           <li><a href="{{ route('gallery') }}" class="{{ Route::currentRouteName() == 'gallery' ? 'active' : '' }}">GALLERY</a></li>
           <li><a href="{{ route('about') }}" class="{{ Route::currentRouteName() == 'about' ? 'active' : '' }}">ABOUT</a></li>
+
+          @auth
+            <li><a href="{{ route('my.orders') }}" class="{{ request()->routeIs('my.orders*') || request()->routeIs('order.show') ? 'active' : '' }}">
+              PESANAN SAYA
+              @php
+                $activeOrders = \App\Models\Order::where('pelanggan_id', auth()->id())
+                                              ->whereIn('status', ['Pending', 'Paid', 'Process', 'Ready'])
+                                              ->count();
+              @endphp
+              @if($activeOrders > 0)
+                <span class="badge bg-info ms-1">{{ $activeOrders }}</span>
+              @endif
+            </a></li>
+          @endauth
+
           <li class="dropdown"><a href="#"><span>STORE</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li class="dropdown"><a href="#"><span>DEPOK</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
@@ -68,6 +83,24 @@
               <li><a href="#">COOMING SOON</a></li>
             </ul>
           </li>
+
+          @php
+            $regularCart = session('cart', []);
+            $customCart = session('custom_cart', []);
+
+            $totalItems = array_sum(array_column($regularCart, 'qty')) + array_sum(array_column($customCart, 'qty'));
+
+            $totalPrice = 0;
+            foreach($regularCart as $item) {
+                $totalPrice += $item['harga'] * $item['qty'];
+            }
+            foreach($customCart as $customItem) {
+                $totalPrice += $customItem['total_price'] * $customItem['qty'];
+            }
+
+            $hasItems = $totalItems > 0;
+          @endphp
+
           <li class="dropdown d-xl-none">
             <a href="#" class="mobile-cart-link">
               <div class="mobile-cart-info">
@@ -114,7 +147,6 @@
               </li>
 
               @if($totalCount > 0)
-                {{-- Regular Cart Items --}}
                 @foreach($cart as $id => $details)
                   <li>
                     <div class="cart-item">
@@ -129,7 +161,6 @@
                   </li>
                 @endforeach
 
-                {{-- Custom Cart Items --}}
                 @foreach($customCart as $id => $details)
                   <li>
                     <div class="cart-item">
@@ -180,8 +211,24 @@
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
-      <!-- FIXED: Desktop Cart with Enhanced Structure -->
       <div class="header-actions d-none d-xl-flex">
+        
+        @auth
+          <div class="header-orders me-3">
+            <a href="{{ route('my.orders') }}" class="orders-btn">
+              <i class="bi bi-clock-history"></i>
+              @php
+                $activeOrders = \App\Models\Order::where('pelanggan_id', auth()->id())
+                                              ->whereIn('status', ['Pending', 'Paid', 'Process', 'Ready'])
+                                              ->count();
+              @endphp
+              @if($activeOrders > 0)
+                <span class="orders-badge">{{ $activeOrders }}</span>
+              @endif
+            </a>
+          </div>
+        @endauth
+
         <div class="header-cart">
           <a href="#" class="cart-btn">
             <i class="bi bi-cart3"></i>
@@ -198,7 +245,6 @@
 
             <div class="cart-content">
               @if($totalCount > 0)
-                {{-- Regular Cart Items --}}
                 @foreach($cart as $id => $details)
                   <div class="cart-item">
                     <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
@@ -211,7 +257,6 @@
                   </div>
                 @endforeach
 
-                {{-- Custom Cart Items --}}
                 @foreach($customCart as $id => $details)
                   <div class="cart-item">
                     <img src="{{ url('admin/img/custom-pancong.jpg') }}" 
@@ -267,14 +312,11 @@
     </div>
   </header>
 
-  <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-  <!-- Preloader -->
   <div id="preloader"></div>
   @include('sweetalert::alert')
 
-  <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
   <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
@@ -282,7 +324,6 @@
   <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
   <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
 
-  <!-- Main JS File -->
   <script src="{{ asset('assets/js/main.js') }}"></script>
 
 </body>

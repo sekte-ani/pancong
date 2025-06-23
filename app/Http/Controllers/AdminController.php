@@ -278,7 +278,7 @@ class AdminController extends Controller
     // ORDER START
     public function indexOrder(Request $request)
     {
-        $order = Order::with(['user', 'orderItems.menu'])->latest('waktu_pesanan');
+        $order = Order::with(['user', 'orderItems.menu', 'customOrderItems.baseMenu'])->latest('waktu_pesanan');
         
         if ($request->has('status') && $request->status != '') {
             $order->where('status', $request->status);
@@ -297,7 +297,7 @@ class AdminController extends Controller
 
     public function showOrder(Order $order)
     {
-        $order->load(['user', 'orderItems.menu']);
+        $order->load(['user', 'orderItems.menu', 'customOrderItems.baseMenu']);
         return view('admin.order.showOrder', compact([
             'order',
         ]));
@@ -313,6 +313,20 @@ class AdminController extends Controller
         $order->update(['status' => $request->status]);
 
         return redirect()->back()->with('success', 'Status pesanan berhasil diupdate!');
+    }
+
+    public function deleteOrder(Order $order)
+    {
+        try {
+            $order->orderItems()->delete();
+            $order->customOrderItems()->delete();
+            
+            $order->delete();
+            
+            return redirect()->route('admin.order')->with('success', 'Pesanan berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus pesanan: ' . $e->getMessage());
+        }
     }
     // ORDER END
 

@@ -47,7 +47,13 @@
 }}">
     <a href="{{ route('admin.order') }}" class='sidebar-link'>
         <i class="bi bi-receipt"></i>
-        <span>Pesanan</span>
+        <span>Kelola Pesanan</span>
+        @php
+            $pendingCount = \App\Models\Order::where('status', 'Pending')->count();
+        @endphp
+        @if($pendingCount > 0)
+            <span class="badge bg-warning ms-2">{{ $pendingCount }}</span>
+        @endif
     </a>
 </li>
 
