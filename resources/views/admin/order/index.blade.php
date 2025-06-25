@@ -175,7 +175,9 @@
                                 <a href="{{ route('admin.showOrder', $o) }}" class="btn btn-primary btn-sm mb-1" title="Lihat Detail">
                                     <i class="bi bi-eye-fill"></i> Detail
                                 </a>
-                                
+                                <a href="{{ route('order.quick-print', $o) }}" class="btn btn-sm btn-outline-info" title="Quick Print" onclick="window.open(this.href, 'print-window', 'width=400,height=600'); return false;">
+                                    <i class="bi bi-printer-fill"></i>
+                                </a>
                                 <form class="d-inline" method="POST" action="{{ route('admin.updateOrderStatus', $o->id_pesanan) }}" 
                                       onsubmit="return confirm('Update status pesanan #{{ $o->id_pesanan }}?')">
                                     @csrf

@@ -35,7 +35,7 @@
                     <td>Rp {{ number_format($m->harga, 0, ',', '.') }}</td>
                     <td>
                         @if ($m->gambar)
-                            <img src="{{ asset('gambar-menu/'.$m->gambar) }}" 
+                            <img src="{{ asset($m->gambar) }}" 
                                  style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" 
                                  class="card-img" alt="...">
                         @else

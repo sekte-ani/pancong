@@ -10,6 +10,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CustomMenuController;
 
 /*
@@ -37,6 +38,9 @@ Route::get('/menu/search', [MenuController::class, 'search'])->name('menu.search
 Route::get('/menu/category', [MenuController::class, 'getByCategory'])->name('menu.category');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/api/stats', [AboutController::class, 'apiStats'])->name('api.stats');
+Route::get('/lokasi', [LocationController::class, 'index'])->name('location');
+Route::get('/api/stores', [LocationController::class, 'apiStores'])->name('api.stores');
 
 // CUSTOM MENU
 Route::middleware(['auth'])->group(function () {
@@ -82,9 +86,15 @@ Route::prefix('/admin')->middleware(['auth', 'verified', 'admin'])->group(functi
     Route::get('/gallery', [AdminController::class, 'indexGallery'])->name('admin.gallery');
     Route::get('/createGallery', [AdminController::class, 'createGallery'])->name('admin.createGallery');
     Route::post('/storeGallery', [AdminController::class, 'storeGallery'])->name('admin.storeGallery');
-    Route::get('/editGallery/{gallery:slug}', [AdminController::class, 'editGallery'])->name('admin.editGallery');
+    Route::get('/editGallery/{gallery}', [AdminController::class, 'editGallery'])->name('admin.editGallery');
     Route::put('/updateGallery/{id}', [AdminController::class, 'updateGallery'])->name('admin.updateGallery');
-    Route::delete('/deleteGallery/{gallery:slug}', [AdminController::class, 'destroyGallery'])->name('admin.deleteGallery');
+    Route::delete('/deleteGallery/{gallery}', [AdminController::class, 'destroyGallery'])->name('admin.deleteGallery');
+
+    Route::get('/users', [AdminController::class, 'indexUsers'])->name('users.index');
+    Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
 
     Route::get('/menu', [AdminController::class, 'indexMenu'])->name('admin.menu');
     Route::get('/showMenu/{menu}', [AdminController::class, 'showMenu'])->name('admin.showMenu');
@@ -106,4 +116,8 @@ Route::prefix('/admin')->middleware(['auth', 'verified', 'admin'])->group(functi
     Route::get('/order/{order}', [AdminController::class, 'showOrder'])->name('admin.showOrder');
     Route::patch('/order/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.updateOrderStatus');
     Route::delete('/order/{order}', [AdminController::class, 'deleteOrder'])->name('admin.deleteOrder');
+
+    Route::get('/order/{order}/print', [AdminController::class, 'printOrder'])->name('order.print');
+    Route::get('/order/{order}/quick-print', [AdminController::class, 'quickPrintOrder'])->name('order.quick-print');
+    Route::post('/orders/print-summary', [AdminController::class, 'printOrdersSummary'])->name('orders.print-summary');
 });

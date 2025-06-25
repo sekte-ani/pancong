@@ -59,6 +59,17 @@
 
 <li class="sidebar-item {{ 
     in_array(Route::currentRouteName(), [
+        'admin.addon', 'admin.createAddon', 'admin.editAddon', 'admin.showAddon'
+    ]) ? 'active' : '' 
+}}">
+    <a href="{{ route('users.index') }}?role=user" class='sidebar-link'>
+        <i class="bi bi-people-fill"></i>
+        <span>Kelola Users</span>
+    </a>
+</li>
+
+<li class="sidebar-item {{ 
+    in_array(Route::currentRouteName(), [
         'admin.gallery', 'admin.createGallery', 'admin.editGallery'
     ]) ? 'active' : '' 
 }}">

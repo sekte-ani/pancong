@@ -136,7 +136,7 @@
                 @foreach($order->customOrderItems as $item)
                   <div class="row mb-3 border-bottom pb-3">
                     <div class="col-2">
-                      <img src="{{ asset('admin/img/nophoto.jpg') }}" 
+                      <img src="{{ asset('assets/img/menu/menu-item-2.png') }}" 
                            alt="Custom Pancong" class="img-fluid rounded">
                     </div>
                     <div class="col-6">

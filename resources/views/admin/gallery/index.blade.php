@@ -22,10 +22,8 @@
             <thead>
                 <tr>
                     <th class="col-sm-1">No</th>
-                    <th class="col-md-2">Title</th>
-                    <th class="col-md-1">Slug</th>
-                    <th class="col-sm-1">Img</th>
-                    <th class="col-sm-1">Url</th>
+                    <th class="col-md-2">Judul</th>
+                    <th class="col-sm-1">Gambar</th>
                     <th class="col-md-2">Action</th>
                 </tr>
             </thead>
@@ -33,19 +31,19 @@
                 @foreach ($gallery as $a)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $a->title }}</td>
-                    <td>{{ $a->slug }}</td>
+                    <td>{{ $a->judul }}</td>
                     <td>
-                        @if ($a->img)
-                            <img src="{{ env('STORAGE_URL') . $a->img }}" style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" class="card-img" alt="...">
+                        @if ($a->gambar)
+                            <img src="{{ asset($a->gambar) }}" 
+                                 style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" 
+                                 class="card-img" alt="...">
                         @else
                             <img src="https://picsum.photos/seed/nophoto" style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" class="card-img" alt="...">
                         @endif
                     </td>
-                    <td><a href="{{ $a->url }}" target="_blank">{{ $a->url }}</a></td>
                     <td>
-                        <a href="{{ route('admin.editGallery', ['gallery' => $a->slug]) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i></a>
-                        <form onsubmit="return confirm('Apakah anda yakin ingin menghapus data?')" class="d-inline" action="{{ route('admin.deleteGallery', ['gallery' => $a->slug]) }}" method="POST">
+                        <a href="{{ route('admin.editGallery', $a) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i></a>
+                        <form onsubmit="return confirm('Apakah anda yakin ingin menghapus data?')" class="d-inline" action="{{ route('admin.deleteGallery', $a) }}" method="POST">
                             @csrf
                             @method('DELETE')
                             <button type="submit" name="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash-fill"></i></button>

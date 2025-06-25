@@ -72,17 +72,36 @@
             </a></li>
           @endauth
 
-          <li class="dropdown"><a href="#"><span>STORE</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <li class="dropdown">
+            <a href="#"><span>STORE</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li class="dropdown"><a href="#"><span>DEPOK</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">KRUKUT</a></li>
-                  <li><a href="#">SAWANGAN</a></li>
+              <li class="dropdown">
+                <a href="#"><span>DEPOK</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                <ul class="w-full">
+                  <li>
+                    <a href="{{ route('location') }}">
+                      <div>
+                        <strong>KRUKUT</strong>
+                        <small class="d-block text-muted">Jl. Raya Krukut No. 25</small>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{{ route('location') }}">
+                      <div>
+                        <strong>SAWANGAN</strong>
+                        <small class="d-block text-muted">Jl. Sawangan Raya No. 88</small>
+                      </div>
+                    </a>
+                  </li>
                 </ul>
               </li>
-              <li><a href="#">COOMING SOON</a></li>
-            </ul>
-          </li>
+              <hr>
+              <li>
+                <a href="{{ route('location') }}" class="btn-getstarted text-white text-center justify-content-center">
+                  Semua Lokasi
+                </a>
+              </li>
 
           @php
             $regularCart = session('cart', []);
@@ -323,7 +342,6 @@
   <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
   <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
-
   <script src="{{ asset('assets/js/main.js') }}"></script>
 
 </body>

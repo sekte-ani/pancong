@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\User;
 use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Gallery;
@@ -11,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\CustomOrderItem;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -100,17 +102,15 @@ class AdminController extends Controller
     public function storeGallery(Request $request)
     {
         $validatedData = $request->validate([
-            'title' => 'required',
-            'slug' => 'required',
-            'img' => 'image|file|max:5120|mimes:jpeg,png,jpg,gif,webp',
-            'url' => 'required|url',
+            'judul' => 'required',
+            'gambar' => 'image|file|max:5120|mimes:jpeg,png,jpg',
         ]);
 
-        if($request->file('img')){
-            $image = $request->file('img');
-            $imageName = str_replace([' ', '/'], '_', $request->title) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('img-galleries'), $imageName);
-            $validatedData['img'] = 'img-galleries/' . $imageName;
+        if($request->file('gambar')){
+            $image = $request->file('gambar');
+            $imageName = str_replace([' ', '/'], '_', $request->judul) . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('foto-galleries'), $imageName);
+            $validatedData['gambar'] = 'foto-galleries/' . $imageName;
         }
 
         Gallery::create($validatedData);
@@ -132,23 +132,21 @@ class AdminController extends Controller
         $gallery = Gallery::findOrFail($id);
 
         $validatedData = $request->validate([
-            'title' => 'required',
-            'slug' => 'required|unique:galeries,slug,'.$id,
-            'img' => 'image|file|max:5120|mimes:jpeg,png,jpg,gif,webp',
-            'url' => 'required|url',
+            'judul' => 'required',
+            'gambar' => 'image|file|max:5120|mimes:jpeg,png,jpg',
         ]);
 
-        if($request->file('img')){
+        if($request->file('gambar')){
             if($request->oldImage){
                 $oldImagePath = public_path($request->oldImage);
                 if(File::exists($oldImagePath)){
                     File::delete($oldImagePath);
                 }
             }
-            $image = $request->file('img');
-            $imageName = str_replace([' ', '/'], '_', $request->title) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('img-galleries'), $imageName);
-            $validatedData['img'] = 'img-galleries/' . $imageName;
+            $image = $request->file('gambar');
+            $imageName = str_replace([' ', '/'], '_', $request->judul) . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('foto-galleries'), $imageName);
+            $validatedData['gambar'] = 'foto-galleries/' . $imageName;
         }
 
         $gallery->update($validatedData);
@@ -400,4 +398,144 @@ class AdminController extends Controller
         return redirect()->route('admin.addon')->with('success', 'Berhasil Menghapus Add-on');
     }
     // ADDON MANAGEMENT END
+
+    // USER MANAGEMENT START
+    public function indexUsers(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('no_telepon', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->where('role', 'user')->withCount('orders')->withSum('orders as total_spent', 'total_harga')->latest()->paginate(15);
+
+        $stats = [
+            'total_users' => User::count(),
+            'active_users' => User::where('role', 'user')->count(),
+            'admin_count' => User::where('role', 'admin')->count(),
+            'new_this_month' => User::whereMonth('created_at', now()->month)
+                                   ->whereYear('created_at', now()->year)
+                                   ->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'stats'));
+    }
+
+    public function showUser(User $user)
+    {
+        $user->load(['orders' => function($query) {
+            $query->with(['orderItems.menu', 'customOrderItems.baseMenu'])
+                  ->latest()
+                  ->take(10);
+        }]);
+
+        $userStats = [
+            'total_orders' => $user->orders()->count(),
+            'total_spent' => $user->orders()->sum('total_harga'),
+            'average_order' => $user->orders()->avg('total_harga') ?? 0,
+            'last_order' => $user->orders()->latest()->first(),
+            'favorite_items' => $this->getUserFavoriteItems($user),
+            'orders_by_status' => $user->orders()
+                                      ->selectRaw('status, count(*) as count')
+                                      ->groupBy('status')
+                                      ->pluck('count', 'status')
+                                      ->toArray(),
+        ];
+
+        return view('admin.users.showUser', compact('user', 'userStats'));
+    }
+
+    public function editUser(User $user)
+    {
+        return view('admin.users.editUser', compact('user'));
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:50',
+            'username' => 'required|string|max:20|unique:users,username,' . $user->id_akun . ',id_akun',
+            'email' => 'required|email|unique:users,email,' . $user->id_akun . ',id_akun',
+            'no_telepon' => 'nullable|string|max:15',
+            'role' => 'required|in:admin,user',
+        ]);
+
+        if ($request->filled('password')) {
+            $request->validate(['password' => 'string|min:8|confirmed']);
+            $validatedData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($validatedData);
+
+        return redirect()->route('users.index')
+                        ->with('success', 'User berhasil diupdate!');
+    }
+
+    public function destroyUser(User $user)
+    {
+        if ($user->orders()->exists()) {
+            return redirect()->back()
+                            ->with('error', 'User tidak dapat dihapus karena memiliki riwayat pesanan!');
+        }
+
+        if ($user->role === 'admin') {
+            return redirect()->back()
+                            ->with('error', 'Admin account tidak dapat dihapus!');
+        }
+
+        $user->delete();
+
+        return redirect()->route('users.index')
+                        ->with('success', 'User berhasil dihapus!');
+    }
+
+    private function getUserFavoriteItems(User $user)
+    {
+        $regularItems = $user->orders()
+                           ->with('orderItems.menu')
+                           ->get()
+                           ->pluck('orderItems')
+                           ->flatten()
+                           ->groupBy('menu.nama_item')
+                           ->map(function($items) {
+                               return [
+                                   'name' => $items->first()->menu->nama_item,
+                                   'count' => $items->sum('qty'),
+                                   'total_spent' => $items->sum('total')
+                               ];
+                           })
+                           ->sortByDesc('count')
+                           ->take(5);
+
+        return $regularItems;
+    }
+    // USER MANAGEMENT END
+
+    // PRINT ORDER START
+    public function printOrder(Order $order)
+    {
+        $order->load(['user', 'orderItems.menu', 'customOrderItems.baseMenu']);
+        
+        // Jika ada DomPDF, gunakan ini:
+        // $pdf = Pdf::loadView('admin.order.print', compact('order'))
+        //           ->setPaper([0, 0, 226.77, 800], 'portrait'); // 58mm thermal paper
+        // return $pdf->download('receipt-' . $order->id_pesanan . '.pdf');
+        
+        // Untuk sekarang, langsung return view untuk browser print
+        return view('admin.order.print', compact('order'));
+    }
+
+    public function quickPrintOrder(Order $order)
+    {
+        $order->load(['user', 'orderItems.menu', 'customOrderItems.baseMenu']);
+        return view('admin.order.print', compact('order'));
+    }
+    // PRINT ORDER END
 }
