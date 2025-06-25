@@ -102,7 +102,8 @@
                   Semua Lokasi
                 </a>
               </li>
-
+            </ul>
+          </li>
           @php
             $regularCart = session('cart', []);
             $customCart = session('custom_cart', []);
