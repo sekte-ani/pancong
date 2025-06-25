@@ -35,7 +35,7 @@
               <div class="row align-items-center">
                 <div class="col-md-2 col-6">
                   <h6 class="mb-1">Pesanan #{{ $order->id_pesanan }}</h6>
-                  <small class="text-muted">{{ $order->waktu_pesanan->format('d M Y, H:i') }}</small>
+                  <small class="text-muted">{{ $order->waktu_pesanan->format('d M Y') }}, {{ $order->created_at->format('H:i') }}</small>
                 </div>
                 <div class="col-md-3 col-6">
                   <span class="badge bg-{{ 

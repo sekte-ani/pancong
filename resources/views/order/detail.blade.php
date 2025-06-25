@@ -58,7 +58,7 @@
                 </tr>
                 <tr>
                   <td><strong>Waktu Pesanan:</strong></td>
-                  <td>{{ $order->waktu_pesanan->format('d F Y, H:i') }}</td>
+                  <td>{{ $order->waktu_pesanan->format('d F Y') }}, {{ $order->created_at->format('H:i') }}</td>
                 </tr>
                 <tr>
                   <td><strong>Nama:</strong></td>
@@ -117,7 +117,7 @@
                 @foreach($order->orderItems as $item)
                   <div class="row mb-3 border-bottom pb-3">
                     <div class="col-2">
-                      <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                      <img src="{{ $item->menu->gambar ? asset($item->menu->gambar) : asset('assets/img/menu/menu-item-2.png') }}" 
                            alt="{{ $item->menu->nama_item }}" class="img-fluid rounded">
                     </div>
                     <div class="col-6">

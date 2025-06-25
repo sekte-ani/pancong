@@ -55,7 +55,7 @@
         </div>
         <div class="row">
             <span>Tanggal:</span>
-            <span>{{ $order->waktu_pesanan->format('d/m/Y H:i') }}</span>
+            <span>{{ $order->waktu_pesanan->format('d/m/Y') }}, {{ $order->created_at->format('H:i') }}</span>
         </div>
         <div class="row">
             <span>Pelanggan:</span>

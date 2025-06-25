@@ -2,7 +2,6 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <head>
   <meta charset="UTF-8">
@@ -240,6 +239,45 @@
     }
   </script>
   <script src="{{ asset('assets/js/main.js') }}"></script>
+  <script>
+    $(document).ready(function() {
+      setTimeout(function() {
+        
+        $('.btn-plus, .btn-minus').off();
+        $(document).off('click', '.btn-plus');
+        $(document).off('click', '.btn-minus');
+        $(document).off('click.quantity', '.btn-plus, .btn-minus');
+        
+        $(document).on('click.menu-final', '.btn-plus', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const menuId = $(this).data('menu-id');
+          const quantitySpan = $(`.count[data-menu-id="${menuId}"]`);
+          const currentQty = parseInt(quantitySpan.text()) || 0;
+          
+          if (currentQty < 99) {
+            quantitySpan.text(currentQty + 1);
+            console.log(`📊 Quantity: ${currentQty} → ${currentQty + 1}`);
+          }
+        });
+        
+        $(document).on('click.menu-final', '.btn-minus', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const menuId = $(this).data('menu-id');
+          const quantitySpan = $(`.count[data-menu-id="${menuId}"]`);
+          const currentQty = parseInt(quantitySpan.text()) || 0;
+          
+          if (currentQty > 0) {
+            quantitySpan.text(currentQty - 1);
+            console.log(`📊 Quantity: ${currentQty} → ${currentQty - 1}`);
+          }
+        });
+      }, 500);
+    });
+  </script>
 </body>
 
 </html>

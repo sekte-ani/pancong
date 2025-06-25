@@ -30,7 +30,7 @@
                         </tr>
                         <tr>
                             <td><strong>Waktu Pesanan:</strong></td>
-                            <td>{{ $order->waktu_pesanan->format('d F Y, H:i') }}</td>
+                            <td>{{ $order->waktu_pesanan->format('d F Y') }}, {{ $order->created_at->format('H:i') }}</td>
                         </tr>
                         <tr>
                             <td><strong>Status:</strong></td>
@@ -73,7 +73,6 @@
                 </div>
             </div>
 
-            <!-- Order Items -->
             <h4>Detail Items</h4>
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -86,12 +85,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Regular Menu Items -->
                         @foreach($order->orderItems as $item)
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="{{ $item->menu->gambar ? asset('gambar-menu/' . $item->menu->gambar) : asset('admin/img/nophoto.jpg') }}" 
+                                        <img src="{{ $item->menu->gambar ? asset($item->menu->gambar) : asset('assets/img/menu/menu-item-2.png') }}" 
                                              alt="{{ $item->menu->nama_item }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                         <div>
                                             <h6 class="mb-0">{{ $item->menu->nama_item }}</h6>
@@ -105,12 +103,11 @@
                             </tr>
                         @endforeach
 
-                        <!-- Custom Menu Items -->
                         @foreach($order->customOrderItems as $item)
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="{{ asset('admin/img/nophoto.jpg') }}" 
+                                        <img src="{{ asset('assets/img/menu/menu-item-2.png') }}" 
                                              alt="Custom Pancong" class="me-2" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                         <div>
                                             <h6 class="mb-0">{{ $item->display_name }}</h6>

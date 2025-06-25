@@ -39,20 +39,9 @@
         let mobileNavToggleBtn = document.querySelector(".mobile-nav-toggle");
 
         if (!mobileNavToggleBtn) {
+            console.warn("Mobile nav toggle button not found");
             return false;
         }
-
-        const newToggle = mobileNavToggleBtn.cloneNode(true);
-        mobileNavToggleBtn.parentNode.replaceChild(
-            newToggle,
-            mobileNavToggleBtn
-        );
-        mobileNavToggleBtn = newToggle;
-
-        mobileNavToggleBtn.style.zIndex = "99999";
-        mobileNavToggleBtn.style.position = "relative";
-        mobileNavToggleBtn.style.pointerEvents = "auto";
-        mobileNavToggleBtn.style.cursor = "pointer";
 
         function mobileNavToogle(e) {
             if (e) {
@@ -81,11 +70,6 @@
         mobileNavToggleBtn.addEventListener("click", mobileNavToogle);
         mobileNavToggleBtn.addEventListener("touchstart", mobileNavToogle);
 
-        window.mobileNavToogle = mobileNavToogle;
-
-        /**
-         * Hide mobile nav on menu link clicks
-         */
         document.querySelectorAll("#navmenu a").forEach((navmenu) => {
             navmenu.addEventListener("click", () => {
                 if (document.querySelector(".mobile-nav-active")) {
@@ -94,53 +78,61 @@
             });
         });
 
-        /**
-         * Toggle mobile nav dropdowns
-         */
-        document
-            .querySelectorAll(".navmenu .toggle-dropdown")
-            .forEach((element) => {
-                element.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    this.parentNode.classList.toggle("active");
-                    this.parentNode.nextElementSibling.classList.toggle(
-                        "dropdown-active"
-                    );
-                });
-            });
-
         return true;
     }
 
-    /**
-     * Try multiple times to initialize mobile nav
-     */
-    function tryInitMobileNav() {
-        let attempts = 0;
-        const maxAttempts = 10;
+    initMobileNavigation();
 
-        function attempt() {
-            attempts++;
+    function initMobileDropdowns() {
+        console.log("Initializing mobile dropdowns");
 
-            if (initMobileNavigation()) {
-                return;
-            }
+        document
+            .querySelectorAll(".navmenu .toggle-dropdown")
+            .forEach((element) => {
+                element.removeEventListener("click", handleDropdownClick);
+            });
 
-            if (attempts < maxAttempts) {
-                setTimeout(attempt, 100);
-            } else {
-                console.log(
-                    "Failed to initialize mobile nav after",
-                    maxAttempts,
-                    "attempts"
-                );
-            }
-        }
+        document
+            .querySelectorAll(".navmenu .toggle-dropdown")
+            .forEach((element) => {
+                element.addEventListener("click", handleDropdownClick);
+            });
 
-        attempt();
+        console.log(
+            "Found dropdown toggles:",
+            document.querySelectorAll(".navmenu .toggle-dropdown").length
+        );
     }
+
+    function handleDropdownClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("Dropdown toggle clicked!");
+
+        const dropdownItem = this.parentNode;
+        const dropdownMenu = this.parentNode.nextElementSibling;
+
+        if (dropdownItem && dropdownMenu) {
+            dropdownItem.classList.toggle("active");
+            dropdownMenu.classList.toggle("dropdown-active");
+
+            console.log("Dropdown toggled:", {
+                hasActive: dropdownItem.classList.contains("active"),
+                hasDropdownActive:
+                    dropdownMenu.classList.contains("dropdown-active"),
+            });
+        } else {
+            console.warn("Dropdown elements not found:", {
+                dropdownItem,
+                dropdownMenu,
+            });
+        }
+    }
+
+    initMobileDropdowns();
+
+    setTimeout(initMobileDropdowns, 1000);
 
     /**
      * Preloader with null check
@@ -177,17 +169,6 @@
 
     document.addEventListener("scroll", toggleScrollTop);
     window.addEventListener("load", toggleScrollTop);
-
-    /**
-     * Initialize everything when DOM is ready
-     */
-    document.addEventListener("DOMContentLoaded", function () {
-        tryInitMobileNav();
-    });
-
-    window.addEventListener("load", function () {
-        setTimeout(tryInitMobileNav, 100);
-    });
 
     /**
      * AOS Init with safety check

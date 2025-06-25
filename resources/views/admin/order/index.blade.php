@@ -167,7 +167,7 @@
                         <td>
                             <div>
                                 {{ $o->waktu_pesanan->format('d/m/Y') }}
-                                <br><small class="text-muted">{{ $o->waktu_pesanan->format('H:i') }}</small>
+                                <br><small class="text-muted">{{ $o->created_at->format('H:i') }}</small>
                             </div>
                         </td>
                         <td class="text-center">
