@@ -79,32 +79,6 @@
                             </div>
                         </div>
 
-                        <div class="card bg-light mt-3">
-                            <div class="card-header">
-                                <h6 class="mb-0"><i class="bi bi-lightbulb me-1"></i>Tips Edit</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled small mb-0">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Pastikan nama add-on jelas dan mudah dipahami
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Harga sebaiknya kelipatan 500 atau 1000
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Nonaktifkan jika add-on sedang tidak tersedia
-                                    </li>
-                                    <li class="mb-0">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Deskripsi membantu customer memahami add-on
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
                         @if($addon->is_active)
                             <div class="alert alert-success mt-3" role="alert">
                                 <i class="bi bi-check-circle me-2"></i>

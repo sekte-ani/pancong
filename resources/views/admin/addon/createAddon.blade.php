@@ -55,34 +55,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-header">
-                                <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Tips</h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled small mb-0">
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Gunakan nama yang jelas dan mudah dipahami
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Set harga yang kompetitif dan wajar
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Deskripsi singkat membantu customer memahami add-on
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="bi bi-check-circle text-success me-1"></i>
-                                        Nonaktifkan add-on yang sedang tidak tersedia
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <hr>
