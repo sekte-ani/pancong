@@ -217,7 +217,6 @@
         </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function openMaps(lat, lng, address) {
             if (lat && lng) {
@@ -227,5 +226,6 @@
             }
         }
     </script>
+    <script src="{{ asset('assets/js/main.js') }}"></script>
 </body>
 </html>

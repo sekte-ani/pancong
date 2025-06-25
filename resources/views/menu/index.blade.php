@@ -12,8 +12,6 @@
   <meta name="user-authenticated" content="{{ auth()->check() ? 'true' : 'false' }}">
   <title>Document</title>
   <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
     window.userAuth = {{ auth()->check() ? 'true' : 'false' }};

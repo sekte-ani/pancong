@@ -221,7 +221,7 @@
                   <div class="empty-cart">
                     <i class="bi bi-cart-x"></i>
                     <p>Keranjang belanja kosong</p>
-                    <a href="{{ route('menu') }}" class="btn-cart-view">Mulai Belanja</a>
+                    <a href="{{ route('menu') }}" class="btn-cart-view justify-content-center" style="color: #ffffff;">Mulai Belanja</a>
                   </div>
                 </li>
               @endif
@@ -312,7 +312,7 @@
                 <div class="empty-cart">
                   <i class="bi bi-cart-x"></i>
                   <p>Keranjang belanja kosong</p>
-                  <a href="{{ route('menu') }}" class="btn-cart-view">Mulai Belanja</a>
+                  <a href="{{ route('menu') }}" class="btn-cart-view" style="color: #ffffff;">Mulai Belanja</a>
                 </div>
               @endif
             </div>
@@ -337,6 +337,8 @@
   <div id="preloader"></div>
   @include('sweetalert::alert')
 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
   <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
@@ -344,6 +346,103 @@
   <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
   <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/main.js') }}"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Universal navbar script loaded');
+      
+      function initMobileNavigation() {
+        let mobileNavToggleBtn = document.querySelector(".mobile-nav-toggle");
+        
+        if (!mobileNavToggleBtn) {
+          console.warn('Mobile nav toggle button not found');
+          return false;
+        }
+        
+        function mobileNavToogle(e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          
+          const body = document.querySelector("body");
+          if (!body) return;
+          
+          const isActive = body.classList.contains("mobile-nav-active");
+          
+          if (isActive) {
+            body.classList.remove("mobile-nav-active");
+            mobileNavToggleBtn.classList.remove("bi-x");
+            mobileNavToggleBtn.classList.add("bi-list");
+            body.style.overflow = "";
+          } else {
+            body.classList.add("mobile-nav-active");
+            mobileNavToggleBtn.classList.remove("bi-list");
+            mobileNavToggleBtn.classList.add("bi-x");
+            body.style.overflow = "hidden";
+          }
+        }
+        
+        mobileNavToggleBtn.addEventListener("click", mobileNavToogle);
+        mobileNavToggleBtn.addEventListener("touchstart", mobileNavToogle);
+        
+        document.querySelectorAll("#navmenu a").forEach((navmenu) => {
+          navmenu.addEventListener("click", () => {
+            if (document.querySelector(".mobile-nav-active")) {
+              mobileNavToogle();
+            }
+          });
+        });
+        
+        return true;
+      }
+      
+      initMobileNavigation();
+      
+      function initMobileDropdowns() {
+        console.log('Initializing mobile dropdowns');
+        
+        document.querySelectorAll(".navmenu .toggle-dropdown").forEach((element) => {
+          element.removeEventListener("click", handleDropdownClick);
+        });
+        
+        document.querySelectorAll(".navmenu .toggle-dropdown").forEach((element) => {
+          element.addEventListener("click", handleDropdownClick);
+        });
+        
+        console.log('Found dropdown toggles:', document.querySelectorAll(".navmenu .toggle-dropdown").length);
+      }
+      
+      function handleDropdownClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Dropdown toggle clicked!');
+        
+        const dropdownItem = this.parentNode;
+        const dropdownMenu = this.parentNode.nextElementSibling;
+        
+        if (dropdownItem && dropdownMenu) {
+          dropdownItem.classList.toggle("active");
+          dropdownMenu.classList.toggle("dropdown-active");
+          
+          console.log('Dropdown toggled:', {
+            hasActive: dropdownItem.classList.contains("active"),
+            hasDropdownActive: dropdownMenu.classList.contains("dropdown-active")
+          });
+        } else {
+          console.warn('Dropdown elements not found:', {
+            dropdownItem,
+            dropdownMenu
+          });
+        }
+      }
+      
+      initMobileDropdowns();
+      
+      setTimeout(initMobileDropdowns, 1000);
+    });
+  </script>
 
 </body>
 

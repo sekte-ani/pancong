@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tentang Kami - {{ $companyInfo['name'] }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .hero-about {
             background: #ffffff;
@@ -125,7 +124,6 @@
         </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function animateCounters() {
             const counters = document.querySelectorAll('.stat-number');
@@ -174,5 +172,6 @@
                 .catch(error => console.log('Error updating stats:', error));
         }, 300000);
     </script>
+    <script src="{{ asset('assets/js/main.js') }}"></script>
 </body>
 </html>
