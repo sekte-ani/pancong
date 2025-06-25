@@ -170,7 +170,7 @@
                 @foreach($cart as $id => $details)
                   <li>
                     <div class="cart-item">
-                      <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
+                      <img src="{{ !empty($details['gambar']) ? url($details['gambar']) : url('assets/img/menu/menu-item-2.png') }}" 
                            alt="{{ $details['nama_item'] ?? 'Item' }}" class="cart-item-img">
                       <div class="cart-item-info">
                         <div class="cart-item-name">{{ $details['nama_item'] ?? 'Unknown Item' }}</div>
@@ -267,7 +267,7 @@
               @if($totalCount > 0)
                 @foreach($cart as $id => $details)
                   <div class="cart-item">
-                    <img src="{{ !empty($details['gambar']) ? url('gambar-menu/'.$details['gambar']) : url('admin/img/nophoto.jpg') }}" 
+                    <img src="{{ !empty($details['gambar']) ? url($details['gambar']) : url('assets/img/menu/menu-item-2.png') }}" 
                          alt="{{ $details['nama_item'] ?? 'Item' }}" class="cart-item-img">
                     <div class="cart-item-info">
                       <div class="cart-item-name">{{ $details['nama_item'] ?? 'Unknown Item' }}</div>
@@ -279,7 +279,7 @@
 
                 @foreach($customCart as $id => $details)
                   <div class="cart-item">
-                    <img src="{{ url('admin/img/custom-pancong.jpg') }}" 
+                    <img src="{{ url('assets/img/menu/menu-item-2.png') }}" 
                          alt="{{ $details['display_name'] ?? 'Custom Pancong' }}" class="cart-item-img">
                     <div class="cart-item-info">
                       <div class="cart-item-name">{{ $details['display_name'] ?? 'Custom Pancong' }}</div>

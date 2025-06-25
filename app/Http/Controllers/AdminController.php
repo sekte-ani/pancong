@@ -175,7 +175,7 @@ class AdminController extends Controller
 
     public function showMenu(Menu $menu)
     {
-        $menu = Menu::findOrFail($menu->id);
+        $menu = Menu::findOrFail($menu->id_item);
 
         return view('admin.menu.showMenu', compact([
             'menu',

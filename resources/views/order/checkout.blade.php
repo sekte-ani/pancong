@@ -41,7 +41,7 @@
                 @foreach($cart as $item)
                   <div class="row mb-3 border-bottom pb-3">
                     <div class="col-2">
-                      <img src="{{ $item['gambar'] ? asset('gambar-menu/' . $item['gambar']) : asset('admin/img/nophoto.jpg') }}" 
+                      <img src="{{ $item['gambar'] ? asset($item['gambar']) : asset('assets/img/menu/menu-item-2.png') }}" 
                            alt="{{ $item['nama_item'] }}" class="img-fluid rounded">
                     </div>
                     <div class="col-6">

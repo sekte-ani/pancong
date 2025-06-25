@@ -37,20 +37,6 @@ class MenuController extends Controller
         ]));
     }
 
-    public function show(Menu $menu){
-        $menu->load('category');
-
-        $relatedMenus = Menu::where('kategori_id', $menu->kategori_id)
-                            ->where('id_item', '!=', $menu->id_item)
-                            ->take(4)
-                            ->get();
-
-        return view('menu.show', compact([
-            'menu',
-            'relatedMenus'
-        ]));
-    }
-
     public function getByCategory(Request $request)
     {
         $kategoriId = $request->get('kategori_id');

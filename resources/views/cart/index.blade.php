@@ -41,7 +41,7 @@
                                 <div class="row cart-item align-items-center py-3 border-bottom" data-item="{{ $item['id_item'] }}">
                                     <div class="col-md-2 col-3">
                                         @if($item['type'] === 'regular')
-                                            <img src="{{ $item['gambar'] ? asset('gambar-menu/'.$item['gambar']) : asset('assets/img/menu/menu-item-2.png') }}" 
+                                            <img src="{{ $item['gambar'] ? asset($item['gambar']) : asset('assets/img/menu/menu-item-2.png') }}" 
                                                 class="img-fluid rounded" alt="{{ $item['nama_item'] }}">
                                         @else
                                             <div class="custom-menu-icon bg-light rounded d-flex align-items-center justify-content-center" 

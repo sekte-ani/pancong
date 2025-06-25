@@ -39,7 +39,7 @@
                                  style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" 
                                  class="card-img" alt="...">
                         @else
-                            <img src="https://picsum.photos/seed/nophoto" 
+                            <img src="{{ asset('assets/img/menu/menu-item-2.png') }}" 
                                  style="object-fit: cover; width: 100%; height: 100px; max-width: 200px;" 
                                  class="card-img" alt="...">
                         @endif

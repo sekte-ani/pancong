@@ -49,7 +49,7 @@
                     <label for="gambar" class="form-label">Gambar Item</label>
                     @if (!empty($menu->gambar))
                         <input type="hidden" name="oldImage" value="{{ $menu->gambar }}">
-                        <img src="{{ asset('gambar-menu/'.$menu->gambar) }}" 
+                        <img src="{{ asset($menu->gambar) }}" 
                              class="img-preview img-fluid mb-3 col-sm-5 d-block">
                     @else
                         <img class="img-preview img-fluid mb-3 col-sm-5">

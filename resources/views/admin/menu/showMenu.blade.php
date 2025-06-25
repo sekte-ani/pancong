@@ -7,10 +7,10 @@
             <div class="row">
                 <div class="col-md-4">
                     @if ($menu->gambar)
-                        <img src="{{ asset('gambar-menu/'.$menu->gambar) }}" 
+                        <img src="{{ asset($menu->gambar) }}" 
                              class="img-fluid rounded" alt="{{ $menu->nama_item }}">
                     @else
-                        <img src="https://picsum.photos/seed/nophoto/400/300" 
+                        <img src="{{ asset('assets/img/menu/menu-item-2.png') }}" 
                              class="img-fluid rounded" alt="No Photo">
                     @endif
                 </div>

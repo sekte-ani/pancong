@@ -57,17 +57,6 @@
           </div>
 
           <div class="row">
-            <div class="col-12">
-              <div class="search-container">
-                <div class="input-group" style="max-width: 310px;">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="bi bi-search text-muted"></i>
-                  </span>
-                  <input type="text" class="form-control border-start-0 ps-0" id="searchInput" 
-                        placeholder="Cari nama pancong..." style="box-shadow: none;">
-                </div>
-              </div>
-            </div>
             <div class="col-lg-3 col-md-4 mb-4">
               <div class="filter-sidebar">
                 <div class="sidebar-header">
@@ -99,7 +88,7 @@
                     @foreach ($menus as $m)
                       <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 menu-item" data-kategori="{{ $m->kategori_id }}" data-name="{{ strtolower($m->nama_item) }}">
                         <div class="card" style="width: 100%; position: relative;" data-menu-id="{{ $m->id_item }}">
-                          <img src="{{ $m->gambar ? asset('gambar-menu/' . $m->gambar) : asset('assets/img/menu/menu-item-2.png') }}" class="card-img-top" alt="{{ $m->nama_item }}">
+                          <img src="{{ $m->gambar ? asset($m->gambar) : asset('assets/img/menu/menu-item-2.png') }}" class="card-img-top" alt="{{ $m->nama_item }}">
                           <div class="card-body p-3" style="padding-bottom: 3.5rem !important;">
                             <h6 class="card-title mb-1">{{ $m->nama_item }}</h6>
                             <p class="card-text text-muted small mb-1">
