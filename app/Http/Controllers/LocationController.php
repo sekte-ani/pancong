@@ -32,7 +32,7 @@ class LocationController extends Controller
                     5 => ['open' => '08:00', 'close' => '23:00'],
                     6 => ['open' => '08:00', 'close' => '23:00'],
                 ],
-                'color' => '#ff9a56'
+                'color' => '#ce1212'
             ],
             [
                 'id' => 2,
@@ -57,7 +57,7 @@ class LocationController extends Controller
                     5 => ['open' => '08:00', 'close' => '23:00'],
                     6 => ['open' => '08:00', 'close' => '23:00'],
                 ],
-                'color' => '#6c5ce7'
+                'color' => '#ce1212'
             ]
         ];
 

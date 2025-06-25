@@ -59,7 +59,7 @@
 
 <li class="sidebar-item {{ 
     in_array(Route::currentRouteName(), [
-        'admin.addon', 'admin.createAddon', 'admin.editAddon', 'admin.showAddon'
+        'users.index', 'users.create', 'users.edit', 'users.show'
     ]) ? 'active' : '' 
 }}">
     <a href="{{ route('users.index') }}?role=user" class='sidebar-link'>

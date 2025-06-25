@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             color: white;
             padding: 60px 0 30px;
         }
@@ -35,21 +35,10 @@
         }
         
         .location-header h4 {
+            color: #ffffff;
             font-size: 1.3rem;
             margin-bottom: 8px;
         }
-        
-        .store-status {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        
-        .status-open { background: #28a745; color: white; }
-        .status-closed { background: #dc3545; color: white; }
-        .status-coming { background: #ffc107; color: #333; }
         
         .map-container {
             height: 180px;
@@ -80,7 +69,7 @@
         .contact-icon {
             width: 32px;
             height: 32px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: #ce1212;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -180,7 +169,7 @@
                                     </div>
                                     <div>
                                         <strong>Telepon</strong>
-                                        <a href="tel:{{ $store['phone'] }}" class="text-decoration-none">{{ $store['phone'] }}</a>
+                                        <a href="tel:{{ $store['phone'] }}" class="text-decoration-none" style="color:#000000;">{{ $store['phone'] }}</a>
                                     </div>
                                 </div>
                                 

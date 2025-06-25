@@ -9,11 +9,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .hero-about {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             color: white;
             padding: 100px 0;
             position: relative;
             overflow: hidden;
+        }
+
+        .hero-about h1 {
+            color: #ce1212;
+        }
+
+        .hero-about p {
+            color: #000000;
         }
         
         .hero-about::before {
@@ -46,7 +54,7 @@
         }
         
         .stats-counter {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: grey;
             color: white;
             padding: 60px 0;
             margin: 80px 0;
