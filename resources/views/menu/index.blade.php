@@ -130,8 +130,8 @@
           <div class="row">
             <div class="col-12 mb-4">
               <div class="card">
-                <div class="card-header bg-primary text-white">
-                  <h5 class="mb-0"><i class="bi bi-1-circle me-2"></i>Pilih Pancong Polos</h5>
+                <div class="card-header" style="background-color: #ce1212">
+                  <h5 class="mb-0 text-white"><i class="bi bi-1-circle me-2"></i>Pilih Pancong Polos</h5>
                 </div>
                 <div class="card-body">
                   <div class="row" id="baseMenuContainer">
@@ -142,8 +142,8 @@
 
             <div class="col-12 mb-4">
               <div class="card">
-                <div class="card-header bg-success text-white">
-                  <h5 class="mb-0"><i class="bi bi-2-circle me-2"></i>Pilih Add-ons (Maksimal 5)</h5>
+                <div class="card-header" style="background-color: #ce1212">
+                  <h5 class="mb-0 text-white"><i class="bi bi-2-circle me-2"></i>Pilih Add-ons (Maksimal 5)</h5>
                 </div>
                 <div class="card-body">
                   <div class="row" id="addonsContainer">
@@ -157,8 +157,8 @@
 
             <div class="col-12 mb-4">
               <div class="card">
-                <div class="card-header bg-warning text-white">
-                  <h5 class="mb-0"><i class="bi bi-3-circle me-2"></i>Konfirmasi Pesanan</h5>
+                <div class="card-header" style="background-color: #ce1212">
+                  <h5 class="mb-0 text-white"><i class="bi bi-3-circle me-2"></i>Konfirmasi Pesanan</h5>
                 </div>
                 <div class="card-body">
                   <form id="customMenuForm">
@@ -190,7 +190,7 @@
                     </div>
                     <div class="row mt-3">
                       <div class="col-12">
-                        <button type="submit" class="btn btn-primary btn-lg w-100" id="addToCartBtn" disabled>
+                        <button type="submit" class="btn btn-success btn-lg w-100" id="addToCartBtn" disabled>
                           <i class="bi bi-cart-plus me-2"></i>Tambah ke Keranjang
                         </button>
                       </div>

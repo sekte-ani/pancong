@@ -44,11 +44,7 @@
     <div class="container position-relative d-flex align-items-center justify-content-between">
 
       <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        {{-- <img src="{{ asset('img/logo_pls.png') }}" alt="logo-pancong"> --}}
-        {{-- <img src="public/img/logo_pls.png" alt="logo-pancong"> --}}
-        <h1 class="sitename">Pancong</h1>
-        <span>!</span>
+        <img src="{{ asset('img/logo_pls.png') }}" alt="logo-pancong">
       </a>
 
       <nav id="navmenu" class="navmenu">
