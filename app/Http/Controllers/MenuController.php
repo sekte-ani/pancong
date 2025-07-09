@@ -21,7 +21,7 @@ class MenuController extends Controller
         }
 
         $menus = $query->get();
-        $categories = Category::withCount('menus')->get();
+        $categories = Category::withCount('menus')->findOrFail(6);
 
         $baseMenus = Menu::canBeBase()->with('category')->get();
         $addons = Addon::active()->get();

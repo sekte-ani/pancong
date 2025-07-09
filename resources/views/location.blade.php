@@ -130,24 +130,26 @@
     <section class="hero-section text-center">
         <div class="container">
             <h1 class="display-5 fw-bold mb-2">📍 Lokasi Kami</h1>
-            <p class="lead mb-0">Temukan outlet Pancong Lumer terdekat!</p>
+            <p class="lead mb-0" style="color: #000000;">Temukan outlet Pancong Lumer terdekat!</p>
         </div>
     </section>
 
     <section class="py-4">
         <div class="container">
             <div class="row">
-                @foreach($stores as $index => $store)
+                <h1 class="text-center">Depok</h1>
+                <hr>
+                @foreach($storesDepok as $index => $storedpk)
                 <div class="col-lg-6 col-xl-6">
                     <div class="location-card card">
-                        <div class="location-header text-center" style="background: linear-gradient(45deg, {{ $store['color'] }}, {{ $store['color'] }}99);">
-                            <h4 class="mb-2">🏪 {{ $store['name'] }}</h4>
+                        <div class="location-header text-center" style="background: linear-gradient(45deg, {{ $storedpk['color'] }}, {{ $storedpk['color'] }}99);">
+                            <h4 class="mb-2">🏪 {{ $storedpk['name'] }}</h4>
                         </div>
                         
                         <div class="card-body p-3">
-                            <div class="map-container" onclick="openMaps({{ $store['latitude'] }}, {{ $store['longitude'] }}, '{{ addslashes($store['address']) }}')">
+                            <div class="map-container" onclick="openMaps({{ $storedpk['latitude'] }}, {{ $storedpk['longitude'] }}, '{{ addslashes($storedpk['address']) }}')">
                                 <div class="d-flex align-items-center justify-content-center h-100 flex-column text-muted">
-                                    <i class="bi bi-geo-alt-fill" style="color: {{ $store['color'] }};"></i>
+                                    <i class="bi bi-geo-alt-fill" style="color: {{ $storedpk['color'] }};"></i>
                                     <p class="mt-1 mb-0 small">Klik untuk Google Maps</p>
                                 </div>
                             </div>
@@ -159,7 +161,7 @@
                                     </div>
                                     <div>
                                         <strong>Alamat</strong>
-                                        {{ $store['address'] }}
+                                        {{ $storedpk['address'] }}
                                     </div>
                                 </div>
                                 
@@ -169,7 +171,7 @@
                                     </div>
                                     <div>
                                         <strong>Telepon</strong>
-                                        <a href="tel:{{ $store['phone'] }}" class="text-decoration-none" style="color:#000000;">{{ $store['phone'] }}</a>
+                                        <a href="tel:{{ $storedpk['phone'] }}" class="text-decoration-none" style="color:#000000;">{{ $storedpk['phone'] }}</a>
                                     </div>
                                 </div>
                                 
@@ -183,12 +185,92 @@
                                             $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                             $today = date('w');
                                             
-                                            $hasDetailedHours = isset($store['detailed_hours']);
+                                            $hasDetailedHours = isset($storedpk['detailed_hours']);
                                         @endphp
                                         <table class="table table-sm hours-table">
                                             @foreach($days as $index => $day)
                                                 @php
-                                                    $dayHours = $store['detailed_hours'][$index];
+                                                    $dayHours = $storedpk['detailed_hours'][$index];
+                                                    $isToday = $index === $today;
+                                                    
+                                                    $currentHour = date('H');
+                                                    $openHour = (int) substr($dayHours['open'], 0, 2);
+                                                    $closeHour = (int) substr($dayHours['close'], 0, 2);
+                                                    $isOpenNow = $isToday && $currentHour >= $openHour && $currentHour < $closeHour;
+                                                @endphp
+                                                <tr class="{{ $isToday ? 'today fw-bold' : '' }}">
+                                                    <td style="width: 10%">
+                                                        {{ $day }}
+                                                    </td>
+                                                    <td>
+                                                        {{ $dayHours['open'] }} - {{ $dayHours['close'] }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div><br>
+            <div class="row">
+                <h1 class="text-center">Jakarta</h1>
+                <hr>
+                @foreach($storesJkt as $index => $storejkt)
+                <div class="col-lg-6 col-xl-6">
+                    <div class="location-card card">
+                        <div class="location-header text-center" style="background: linear-gradient(45deg, {{ $storejkt['color'] }}, {{ $storejkt['color'] }}99);">
+                            <h4 class="mb-2">🏪 {{ $storejkt['name'] }}</h4>
+                        </div>
+                        
+                        <div class="card-body p-3">
+                            <div class="map-container" onclick="openMaps({{ $storejkt['latitude'] }}, {{ $storejkt['longitude'] }}, '{{ addslashes($storejkt['address']) }}')">
+                                <div class="d-flex align-items-center justify-content-center h-100 flex-column text-muted">
+                                    <i class="bi bi-geo-alt-fill" style="color: {{ $storejkt['color'] }};"></i>
+                                    <p class="mt-1 mb-0 small">Klik untuk Google Maps</p>
+                                </div>
+                            </div>
+                            
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="bi bi-geo-alt"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Alamat</strong>
+                                        {{ $storejkt['address'] }}
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="bi bi-telephone"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Telepon</strong>
+                                        <a href="tel:{{ $storejkt['phone'] }}" class="text-decoration-none" style="color:#000000;">{{ $storejkt['phone'] }}</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                    <div>
+                                        <strong>Jam Operasional</strong>
+                                        @php
+                                            $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                                            $today = date('w');
+                                            
+                                            $hasDetailedHours = isset($storejkt['detailed_hours']);
+                                        @endphp
+                                        <table class="table table-sm hours-table">
+                                            @foreach($days as $index => $day)
+                                                @php
+                                                    $dayHours = $storejkt['detailed_hours'][$index];
                                                     $isToday = $index === $today;
                                                     
                                                     $currentHour = date('H');

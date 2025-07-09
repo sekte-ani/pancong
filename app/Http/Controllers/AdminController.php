@@ -48,7 +48,7 @@ class AdminController extends Controller
     public function storeCategory(Request $request)
     {
         $request->validate([
-            'nama_kategori' => 'required|string|max:100|unique:kategoris,nama_kategori'
+            'nama_kategori' => 'required|string|max:100|unique:categories,nama_kategori'
         ]);
 
         Category::create($request->all());

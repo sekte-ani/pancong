@@ -86,7 +86,20 @@
                     <a href="{{ route('location') }}">
                       <div>
                         <strong>SAWANGAN</strong>
-                        <small class="d-block text-muted">Jl. Sawangan Raya No. 88</small>
+                        <small class="d-block text-muted">Jl. Raya sawangan</small>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#"><span>JAKARTA</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                <ul class="w-full">
+                  <li>
+                    <a href="{{ route('location') }}">
+                      <div>
+                        <strong>PONDOK LABU</strong>
+                        <small class="d-block text-muted">Jl. Komp. Timah No.1</small>
                       </div>
                     </a>
                   </li>

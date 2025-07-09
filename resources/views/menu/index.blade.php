@@ -70,13 +70,13 @@
                     <span>Semua Menu</span>
                     <small class="text-muted ms-auto">({{ $menus->count() }})</small>
                   </div>
-                  @foreach($categories as $c)
-                    <div class="filter-item" data-kategori="{{ $c->id }}">
+                  {{-- @foreach($categories as $c) --}}
+                    <div class="filter-item" data-kategori="{{ $categories->id }}">
                       <i class="bi bi-tag me-2"></i>
-                      <span>{{ $c->nama_kategori }}</span>
-                      <small class="text-muted ms-auto">({{ $c->menus_count }})</small>
+                      <span>{{ $categories->nama_kategori }}</span>
+                      <small class="text-muted ms-auto">({{ $categories->menus_count }})</small>
                     </div>
-                  @endforeach
+                  {{-- @endforeach --}}
                 </div>
               </div>
             </div>
