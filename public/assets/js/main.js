@@ -596,7 +596,7 @@
                     }" style="cursor: pointer;">
                         <img src="${
                             menu.gambar
-                                ? "/gambar-menu/" + menu.gambar
+                                ? "/" + menu.gambar
                                 : "/assets/img/menu/menu-item-2.png"
                         }" 
                              class="card-img-top" alt="${menu.nama_item}">
